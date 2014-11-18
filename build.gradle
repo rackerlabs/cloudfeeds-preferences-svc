@@ -1,0 +1,34 @@
+apply plugin: 'scala'
+apply plugin:'application'
+// gradle run
+// gradle run --debug-jvm
+// gradle installApp
+// gradle distZip
+// gradle distTar
+
+mainClassName = "com.rackspace.prefs.WebApp"
+
+ext.scala_version = '2.10.4'
+ext.scalatra_version = '2.3.0'
+ext.jetty_version = '9.2.3.v20140905'
+
+dependencies {
+    compile 'org.scala-lang:scala-compiler:' + scala_version
+    compile 'org.scala-lang:scala-library:' + scala_version
+    compile 'org.scalatra:scalatra_2.10:' + scalatra_version
+    compile 'org.scalatra:scalatra-scalate_2.10:' + scalatra_version
+    compile 'org.scalatra:scalatra-json_2.10:2.3.0'
+    compile 'org.json4s:json4s-jackson_2.10:3.2.11'
+    compile 'com.typesafe.slick:slick_2.10:2.1.0'
+    compile 'com.h2database:h2:1.4.182'
+    compile 'c3p0:c3p0:0.9.1.2'
+    compile 'org.eclipse.jetty:jetty-webapp:' + jetty_version
+    compile 'org.eclipse.jetty:jetty-servlet:' + jetty_version
+    compile 'javax.servlet:javax.servlet-api:3.0.1'
+    compile 'org.slf4j:slf4j-simple:1.6.1'
+}
+
+repositories {
+    mavenCentral()
+}
+

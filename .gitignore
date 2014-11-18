@@ -1,0 +1,15 @@
+## IDEA stuff
+.idea/
+*.iml
+*.iws
+*.ipr
+
+## Gradle Stuff
+build
+.gradle/
+
+## generic files to ignore
+*~
+*.lock
+*.DS_Store
+*.swp
