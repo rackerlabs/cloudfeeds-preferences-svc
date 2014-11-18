@@ -2,6 +2,7 @@ package com.rackspace.prefs
 
 import com.rackspace.prefs.model.ResourceTypeMetadata
 import com.rackspace.prefs.model.AttributeMetadata
+import com.rackspace.prefs.model.ResourceInstance
 import com.rackspace.prefs.model.DBTables._
 import scala.slick.jdbc.JdbcBackend.Database.dynamicSession
 import org.scalatra.ScalatraServlet
@@ -73,6 +74,23 @@ case class PreferencesService(db: Database) extends ScalatraServlet
     db withDynSession {
       resources.filter(_.id === id).run.map(m => m._3).head
     }
+  }
+
+  post("/:resourceType/:id") {
+    val resourceType = params("resourceType")
+    val id = params("id")
+    val payload = request.body
+    db withDynSession {
+      if (resources.filter(_.id === id).run.isEmpty)
+        resources.insert(resourceType, id, payload)
+      else
+        resources
+          .filter(r => r.resourceType === resourceType && r.id === id)
+          .map(r => (r.payload))
+          .update((payload))
+    }
+    //val instance: ResourceInstance = parsedBody.extract[ResourceInstance]
+    //resources.insertOrUpdate( (instance.resourceType, instance.id, instance.payload) )
   }
 
   get("/setup") {
