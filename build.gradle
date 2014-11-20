@@ -1,12 +1,29 @@
-apply plugin: 'scala'
-apply plugin:'application'
-// gradle run
-// gradle run --debug-jvm
-// gradle installApp
-// gradle distZip
-// gradle distTar
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+        maven { url 'https://oss.sonatype.org/content/groups/public' }
+    }
+    dependencies {
+        classpath 'com.bmuschko:gradle-nexus-plugin:2.1.1'
+        classpath 'com.github.townsfolk:gradle-release:1.2'
+    }
+}
 
+apply plugin: 'scala'
+apply plugin: 'application'
+apply plugin: 'com.bmuschko.nexus'
+apply plugin: 'release'
+
+defaultTasks  'clean', 'build'
+
+group = 'com.rackspace.prefs'
+version = '1.0.0-SNAPSHOT'
 mainClassName = "com.rackspace.prefs.WebApp"
+
+repositories {
+    mavenCentral()
+}
 
 ext.scala_version = '2.10.4'
 ext.scalatra_version = '2.3.0'
@@ -24,11 +41,43 @@ dependencies {
     compile 'c3p0:c3p0:0.9.1.2'
     compile 'org.eclipse.jetty:jetty-webapp:' + jetty_version
     compile 'org.eclipse.jetty:jetty-servlet:' + jetty_version
-    compile 'javax.servlet:javax.servlet-api:3.0.1'
     compile 'org.slf4j:slf4j-simple:1.6.1'
+    compile 'javax.servlet:javax.servlet-api:3.0.1'
 }
 
-repositories {
-    mavenCentral()
+release {
+    failOnPublishNeeded = false
+    failOnCommitNeeded = false
+    failOnUnversionedFiles = false
+    tagPrefix = name
 }
 
+// 'gradle release' will also upload release to Nexus
+createReleaseTag.dependsOn uploadArchives
+
+modifyPom {
+    project {
+        name          'Preferences Service'
+        description   'A service that provides REST API access to set (and validate) / get a group of key/value property'
+        url           'http://github.com/rackerlabs/preferences-service'
+        packaging     'jar'
+        inceptionYear '2014'
+       
+        scm {
+            url        'https://github.com/rackerlabs/preferences-service'
+            connection 'scm:git:ssh://git@github.com/rackerlabs/preferences-service.git'
+        }
+    }
+}
+
+extraArchive {
+    sources = true
+    tests = true
+    javadoc = false
+}
+
+nexus {
+    sign = false
+    repositoryUrl = 'http://maven.research.rackspacecloud.com/content/repositories/releases/'
+    snapshotRepositoryUrl = 'http://maven.research.rackspacecloud.com/content/repositories/snapshots/'
+}
