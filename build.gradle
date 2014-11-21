@@ -17,6 +17,7 @@ apply plugin: 'release'
 
 defaultTasks  'clean', 'build'
 
+sourceCompatibility = '1.7'
 group = 'com.rackspace.prefs'
 version = '1.0.0-SNAPSHOT'
 mainClassName = "com.rackspace.prefs.WebApp"
@@ -43,6 +44,7 @@ dependencies {
     compile 'org.eclipse.jetty:jetty-servlet:' + jetty_version
     compile 'org.slf4j:slf4j-simple:1.6.1'
     compile 'javax.servlet:javax.servlet-api:3.0.1'
+    testCompile 'org.scalatest:scalatest_2.10:2.1.7'
 }
 
 release {

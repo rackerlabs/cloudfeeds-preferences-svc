@@ -28,11 +28,12 @@ object DBTables {
   val resourceAttributes = TableQuery[ResourceAttributes]
 
   class Resources(tag: Tag) extends Table[(String, String, String)](tag, "RESOURCES") {
-    //TODO: figure out how to make this unique on (resourceType, id)
     def resourceType = column[String]("RESOURCE_TYPE")
     def id = column[String]("ID")
     def payload = column[String]("PAYLOAD")
     def * = (resourceType, id ,payload)
+
+    def pk = primaryKey("compound_pk", (resourceType, id))
     def slug = foreignKey("RESOURCE_SLUG_FK", resourceType, resourceTypes)(_.slug)
   }
   val resources = TableQuery[Resources]
