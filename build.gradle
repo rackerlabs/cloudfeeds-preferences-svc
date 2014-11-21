@@ -1,5 +1,7 @@
 apply plugin: 'scala'
 apply plugin:'application'
+sourceCompatibility = '1.7'
+
 // gradle run
 // gradle run --debug-jvm
 // gradle installApp
@@ -26,6 +28,7 @@ dependencies {
     compile 'org.eclipse.jetty:jetty-servlet:' + jetty_version
     compile 'javax.servlet:javax.servlet-api:3.0.1'
     compile 'org.slf4j:slf4j-simple:1.6.1'
+    testCompile 'org.scalatest:scalatest_2.10:2.1.7'
 }
 
 repositories {
