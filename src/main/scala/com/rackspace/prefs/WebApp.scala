@@ -1,5 +1,7 @@
 package com.rackspace.prefs
 
+import com.rackspace.prefs.config.AppConfig
+
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.webapp.WebAppContext
 import org.scalatra.servlet.ScalatraListener
@@ -8,12 +10,12 @@ object WebApp {
 
   def main(args: Array[String]) {
 
-    val server = new Server(envInt("PREFS_PORT", 8080))
+    val server = new Server(AppConfig.Http.port)
     val context = new WebAppContext()
 
     context.setServer(server)
     context.setContextPath("/")
-    context.setResourceBase("src/main/webapp")
+    context.setResourceBase(".")
     context.setEventListeners(Array(new ScalatraListener))
     server.setHandler(context)
 
