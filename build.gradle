@@ -61,7 +61,8 @@ release {
     failOnPublishNeeded = false
     failOnCommitNeeded = false
     failOnUnversionedFiles = false
-    tagPrefix = name
+    failOnUpdateNeeded = false
+    tagPrefix = 'preferences-service'
 }
 
 // 'gradle release' will also upload release to Nexus
