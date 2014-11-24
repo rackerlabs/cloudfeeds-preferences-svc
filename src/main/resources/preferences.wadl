@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<application xmlns="http://wadl.dev.java.net/2009/02"
+             xmlns:xs="http://www.w3.org/2001/XMLSchema"
+             xmlns:rax="http://docs.rackspace.com/api"
+             xmlns:atom="http://www.w3.org/2005/Atom">
+
+    <doc title="Preferences Service"/>
+
+    <resources base="http://localhost/">
+
+        <!-- resource to fetch metadata -->
+        <resource id="metadata" path="metadata">
+            <resource id="metadata_for_resource" path="{resourceName}" rax:roles="cloudfeeds:observer cloudfeeds:service-admin">
+                <param name="resourceName" type="xs:string" style="template">
+                    <doc>This parameter specifies the resource name for which the metadata is to be fetched</doc>
+                </param>
+                <method name="GET"/>
+            </resource>
+        </resource>
+
+        <!-- resource to fetch archive_prefs -->
+        <resource id="archive_prefs" path="archive_prefs">
+            <resource id="get_archive_prefs_for_account" path="{accountId}" rax:roles="cloudfeeds:observer cloudfeeds:service-admin">
+                <param name="accountId" type="xs:string" style="template">
+                    <doc>This parameter specifies the cloud account ID for which the Cloud Feeds Archiving preferences is to be fetched</doc>
+                </param>
+                <method name="GET"/>
+            </resource>
+            <resource id="set_archive_prefs_for_account" path="{accountId}" rax:roles="cloudfeeds:service-admin">
+                <param name="accountId" type="xs:string" style="template">
+                    <doc>This parameter specifies the cloud account ID for which the Cloud Feeds Archiving preferences is to be fetched</doc>
+                </param>
+                <method name="POST"/>
+            </resource>
+        </resource>
+
+    </resources>
+</application>
