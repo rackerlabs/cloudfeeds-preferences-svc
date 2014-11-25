@@ -19,14 +19,14 @@ object AppConfig {
    */
   val config = if (Option(System.getProperty("config.file")).nonEmpty) {
 
-                          logger.info("Loading config from external path:" + System.getProperty("config.file"))
-                          ConfigFactory.load()
-                                       .withFallback(classpathConfig)
+    logger.info("Loading config from external path:" + System.getProperty("config.file"))
+    ConfigFactory.load()
+      .withFallback(classpathConfig)
 
-                       } else {
-                          logger.info("Loading config from classpath")
-                          classpathConfig
-                       }
+  } else {
+    logger.info("Loading config from classpath")
+    classpathConfig
+  }
 
   object Http {
     private val http = config.getConfig("appConfig.http")

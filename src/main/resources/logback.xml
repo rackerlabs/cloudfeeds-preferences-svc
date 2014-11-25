@@ -1,4 +1,4 @@
-<configuration debug="true">
+<configuration>
 
     <!--The contents of this file should be present within the <included></included> tag.-->
     <include file="/etc/preferences-service/logback.xml" />
