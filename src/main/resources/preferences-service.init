@@ -1,0 +1,132 @@
+#!/bin/bash
+#
+# preferences-service    Init script for running the preferences service
+#
+# Author:                Alex Schultz <alex.schultz@rackspace.com>
+#
+# chkconfig: 345 85 15
+#
+### BEGIN INIT INFO
+# Provides: preferences-service
+# Required-Start: $network $syslog
+# Required-Stop: $network $syslog
+# Default-Start:
+# Default-Stop:
+# Description: Script for starting Preferences Service as a daemon on system startup
+# Short-Description: start and stop preferences-service
+### END INIT INFO
+#
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+#################################
+# Default configuration options #
+#################################
+
+# user to run the service as
+USER=root
+# name of the service
+NAME="$(basename $0)"
+# configuration directory
+CONFIG_DIRECTORY="/etc/${NAME}"
+# configuration file
+CONFIG_FILE="${CONFIG_DIRECTORY}/${NAME}.conf"
+# default log locatiojn
+LOG_PATH="/var/log/${NAME}"
+# pid file location
+PID_FILE="/var/run/${NAME}.pid"
+# default run options
+RUN_OPTS=""
+# default java options
+JAVA_OPTS="-Dconfig.file=${CONFIG_FILE}"
+# home directory for the service
+DAEMON_HOME="/usr/share/lib/${NAME}"
+# location of the jar for the service
+DAEMON_JAR="${DAEMON_HOME}/${NAME}.jar"
+# daemonize location
+DAEMONIZE=/usr/sbin/daemonize
+# default daemonize options
+DAEMONIZE_OPTS="-c ${DAEMON_HOME} -p ${PID_FILE} -u ${USER} -o ${LOG_PATH}/stdout.log -e ${LOG_PATH}/stderr.log -l /var/lock/subsys/${NAME}"
+
+# Override the defaults via /etc/sysconfig/${NAME}
+if [ -f "/etc/sysconfig/${NAME}" ]; then
+  . /etc/sysconfig/${NAME}
+fi
+
+#################
+# Sanity checks #
+#################
+
+# check for existance of the daemon home folder
+if [ ! -d "${DAEMON_HOME}" ]; then
+  echo "Unable to find ${NAME}'s directory: ${DAEMON_HOME}."
+  exit 1
+fi
+
+# check for the existance of the daemon jar
+if [ ! -f "${DAEMON_JAR}" ]; then
+  echo "Unable to find ${NAME}.jar"
+  exit 1
+fi
+
+# check for the configuration directory
+if [ ! -d "${CONFIG_DIRECTORY}" ]; then
+  echo "Unable to find ${CONFIG_DIRECTORY}."
+  exit 1
+fi
+
+# check for the logging directory
+if [ ! -d "${LOG_PATH}" ]; then
+  echo "Unable to log to ${LOG_PATH}."
+  exit 1
+fi
+
+# check to make sure daemonize is available
+if [ ! -x "${DAEMONIZE}" ]; then
+  echo "Unable to find daemonize, ${DAEMONIZE}"
+  exit 1
+fi
+
+
+#############
+# Functions #
+#############
+
+start()
+{
+  echo -n "Starting ${NAME}: "
+  daemon $DAEMONIZE $DAEMONIZE_OPTS /usr/bin/java $JAVA_OPTS -jar "${DAEMON_JAR}" $RUN_OPTS
+  echo
+}
+
+stop()
+{
+  echo -n "Stopping ${NAME}: "
+
+  killproc -p $PID_FILE -d 3 $NAME && rm -f "/var/lock/subsys/${NAME}"
+  echo
+}
+
+case "$1" in
+  start)
+    start
+    ;;
+
+  stop)
+    stop
+    ;;
+
+  restart)
+    stop
+    start
+    ;;
+
+  status)
+    status -p $PID_FILE ${NAME}
+    ;;
+
+  *)
+    echo "Usage: /etc/init.d/$NAME {start|stop|restart|status}"
+    exit 1
+esac
