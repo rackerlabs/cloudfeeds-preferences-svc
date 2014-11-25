@@ -30,6 +30,8 @@ USER=root
 NAME="$(basename $0)"
 # configuration directory
 CONFIG_DIRECTORY="/etc/${NAME}"
+# configuration file
+CONFIG_FILE="${CONFIG_DIRECTORY}/${NAME}.conf"
 # default log locatiojn
 LOG_PATH="/var/log/${NAME}"
 # pid file location
@@ -37,7 +39,7 @@ PID_FILE="/var/run/${NAME}.pid"
 # default run options
 RUN_OPTS=""
 # default java options
-JAVA_OPTS=""
+JAVA_OPTS="-Dconfig.file=${CONFIG_FILE}"
 # home directory for the service
 DAEMON_HOME="/usr/share/lib/${NAME}"
 # location of the jar for the service
