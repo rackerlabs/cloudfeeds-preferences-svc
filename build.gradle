@@ -83,6 +83,7 @@ release {
 }
 
 // 'gradle release' will also upload release to Nexus
+uploadArchives.dependsOn   uberjar
 createReleaseTag.dependsOn uploadArchives
 
 modifyPom {
