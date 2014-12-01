@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<c3p0-config>
+    <default-config>
+        <property name="driverClass">org.h2.Driver</property>
+        <property name="jdbcUrl">jdbc:h2:mem:test</property>
+        <property name="user">root</property>
+        <property name="password"></property>
+        <property name="minPoolSize">1</property>
+        <property name="maxPoolSize">50</property>
+        <property name="acquireIncrement">1</property>
+    </default-config>
+</c3p0-config>

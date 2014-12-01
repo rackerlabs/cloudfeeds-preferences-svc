@@ -48,9 +48,16 @@ dependencies {
     testCompile 'org.scalatest:scalatest_2.10:2.1.7'
 }
 
+
 // task to create one uber executable jar
 task uberjar(type: Jar) {
-    from sourceSets.main.output
+    from {
+        sourceSets.main.output
+    } {
+        // For prod/staging deploy external file with db config must be provided
+        exclude "c3p0-config.xml"
+    }
+
     from configurations.runtime.asFileTree.files.collect { zipTree(it) }
 
     manifest {
