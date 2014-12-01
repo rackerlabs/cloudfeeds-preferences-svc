@@ -61,13 +61,21 @@ dependencies {
     compile 'org.eclipse.jetty:jetty-webapp:' + jetty_version
     compile 'org.eclipse.jetty:jetty-servlet:' + jetty_version
     compile 'org.slf4j:slf4j-simple:1.6.1'
+    compile 'ch.qos.logback:logback-classic:1.1.2'
     compile 'javax.servlet:javax.servlet-api:3.0.1'
     testCompile 'org.scalatest:scalatest_2.10:2.1.7'
 }
 
+
 // task to create one uber executable jar
 task uberjar(type: Jar) {
-    from files(sourceSets.main.output.classesDir)
+    from {
+        sourceSets.main.output
+    } {
+        // For prod/staging deploy external file with db config must be provided
+        exclude "c3p0-config.xml"
+    }
+
     from configurations.runtime.asFileTree.files.collect { zipTree(it) }
 
     manifest {
