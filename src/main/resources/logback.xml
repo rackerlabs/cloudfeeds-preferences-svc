@@ -1,5 +1,22 @@
 <configuration>
+    <!-- See also http://logback.qos.ch/manual/appenders.html#RollingFileAppender -->
+    <appender name="defaultFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <File>/var/log/preferences-service/preferences-service.log</File>
 
-    <!--The contents of this file should be present within the <included></included> tag.-->
-    <include file="/etc/preferences-service/logback.xml" />
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-4r [%t] %-5p %c - %m%n</pattern>
+        </encoder>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- Keep 30 days of compressed history. -->
+            <maxIndex>30</maxIndex>
+
+            <!-- Daily rollover with gzip compression. -->
+            <FileNamePattern>/var/log/preferences-service/preferences-service.%d{yyyy-MM-dd}.log.gz</FileNamePattern>
+        </rollingPolicy>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="defaultFile" />
+    </root>
 </configuration>
