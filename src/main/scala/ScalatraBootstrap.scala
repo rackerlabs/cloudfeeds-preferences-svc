@@ -43,7 +43,7 @@ class ScalatraBootstrap extends LifeCycle {
     }
 
     pooledDataSource = new ComboPooledDataSource
-    logger.info("Created c3p0 connection pool")
+    logger.debug("Created c3p0 connection pool")
   }
 
   private def closeDbConnection() {
