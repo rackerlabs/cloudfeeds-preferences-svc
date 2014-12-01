@@ -25,7 +25,7 @@
 #################################
 
 # user to run the service as
-USER=root
+USER=prefssvc
 # name of the service
 NAME="$(basename $0)"
 # configuration directory
@@ -41,9 +41,9 @@ RUN_OPTS=""
 # default java options
 JAVA_OPTS="-Dconfig.file=${CONFIG_FILE}"
 # home directory for the service
-DAEMON_HOME="/usr/share/lib/${NAME}"
+DAEMON_HOME="/usr/share/${NAME}"
 # location of the jar for the service
-DAEMON_JAR="${DAEMON_HOME}/${NAME}.jar"
+DAEMON_JAR="${DAEMON_HOME}/lib/${NAME}.jar"
 # daemonize location
 DAEMONIZE=/usr/sbin/daemonize
 # default daemonize options
