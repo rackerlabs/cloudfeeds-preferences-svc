@@ -1,11 +1,4 @@
 <configuration>
-    <appender name="SYSLOG" class="ch.qos.logback.classic.net.SyslogAppender">
-        <syslogHost>syslog.staging.ord1.us.ci.rackspace.net</syslogHost>
-        <port>514</port>
-        <facility>LOCAL3</facility>
-        <suffixPattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-4r [%t] %-5p %c - %m%n</suffixPattern>
-    </appender>
-
     <!-- See also http://logback.qos.ch/manual/appenders.html#RollingFileAppender -->
     <appender name="defaultFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <File>/var/log/preferences-service/preferences-service.log</File>
@@ -24,7 +17,6 @@
     </appender>
 
     <root level="INFO">
-        <appender-ref ref="SYSLOG" />
         <appender-ref ref="defaultFile" />
     </root>
 </configuration>
