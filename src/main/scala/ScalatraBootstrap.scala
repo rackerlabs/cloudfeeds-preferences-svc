@@ -1,7 +1,11 @@
-import java.nio.file.{Paths, Files}
+import java.nio.file.{Files, Paths}
 import javax.servlet.ServletContext
 
-import com.mchange.v2.c3p0.{PooledDataSource, ComboPooledDataSource}
+import ch.qos.logback.classic.LoggerContext
+import ch.qos.logback.classic.joran.JoranConfigurator
+import ch.qos.logback.core.joran.spi.JoranException
+import ch.qos.logback.core.util.StatusPrinter
+import com.mchange.v2.c3p0.{ComboPooledDataSource, PooledDataSource}
 import com.rackspace.prefs.PreferencesService
 import com.rackspace.prefs.config.AppConfig
 import org.scalatra.LifeCycle
@@ -20,6 +24,7 @@ class ScalatraBootstrap extends LifeCycle {
   override def init(context: ServletContext) {
 
     intiDbPool
+    configLog
 
     val db = Database.forDataSource(pooledDataSource)
     context.mount(new PreferencesService(db), "/*")
@@ -44,6 +49,29 @@ class ScalatraBootstrap extends LifeCycle {
 
     pooledDataSource = new ComboPooledDataSource
     logger.debug("Created c3p0 connection pool")
+  }
+
+  def configLog {
+
+    val loggerContext = LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext]
+
+    //check for external logback file.
+    if (Files.exists(Paths.get(AppConfig.Log.configFile))) {
+
+      try {
+        val configurator = new JoranConfigurator();
+        configurator.setContext(loggerContext);
+        loggerContext.reset();
+        configurator.doConfigure(AppConfig.Log.configFile);
+
+        logger.info("Using logback config from external file :" + AppConfig.Log.configFile)
+
+      } catch {
+        case joe: JoranException =>   // StatusPrinter will handle this
+      }
+
+      StatusPrinter.printInCaseOfErrorsOrWarnings(loggerContext);
+    }
   }
 
   private def closeDbConnection() {

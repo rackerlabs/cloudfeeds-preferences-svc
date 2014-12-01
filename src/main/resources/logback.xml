@@ -1,4 +1,4 @@
-<configuration>
+<configuration debug="true">
     <!-- See also http://logback.qos.ch/manual/appenders.html#RollingFileAppender -->
     <appender name="defaultFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <File>/var/log/preferences-service/preferences-service.log</File>
@@ -9,7 +9,7 @@
 
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- Keep 30 days of compressed history. -->
-            <maxIndex>30</maxIndex>
+            <maxHistory>30</maxHistory>
 
             <!-- Daily rollover with gzip compression. -->
             <FileNamePattern>/var/log/preferences-service/preferences-service.%d{yyyy-MM-dd}.log.gz</FileNamePattern>
