@@ -24,7 +24,7 @@ group = 'com.rackspace.prefs'
 mainClassName = "com.rackspace.prefs.WebApp"
 
 // our package name for the RPM
-def package_name = 'cloudfeeds-preferences-service'
+def package_name = 'cloudfeeds-preferences-svc'
 // our app name used by the rpm stuff
 def app_name = 'preferences-service'
 // clean version number with no -SNAPSHOT
@@ -83,28 +83,17 @@ task uberjar(type: Jar) {
     }
 }
 
-release {
-    failOnPublishNeeded = false
-    failOnCommitNeeded = false
-    failOnUnversionedFiles = false
-    tagPrefix = 'preferences-service'
-}
-
-// 'gradle release' will also upload release to Nexus
-uploadArchives.dependsOn   uberjar
-createReleaseTag.dependsOn uploadArchives
-
 modifyPom {
     project {
-        name          'Preferences Service'
+        name          'Cloud Feeds Preferences Service'
         description   'A service that provides REST API access to set (and validate) / get a group of key/value property'
-        url           'http://github.com/rackerlabs/preferences-service'
+        url           'http://github.com/rackerlabs/cloudfeeds-preferences-svc'
         packaging     'jar'
         inceptionYear '2014'
 
         scm {
-            url        'https://github.com/rackerlabs/preferences-service'
-            connection 'scm:git:ssh://git@github.com/rackerlabs/preferences-service.git'
+            url        'https://github.com/rackerlabs/cloudfeeds-preferences-svc'
+            connection 'scm:git:ssh://git@github.com/rackerlabs/cloudfeeds-preferences-svc.git'
         }
     }
 }
@@ -129,7 +118,7 @@ ospackage {
     release = 1
     packageGroup = 'Application/System'
     packageDescription = 'This is the cloudfeeds preferences service application'
-    url = 'http://github.com/rackerlabs/preferences-service'
+    url = 'http://github.com/rackerlabs/cloudfeeds-preferences-svc'
 
     // pre and post scriptlets
     preInstall file('src/main/resources/preinstall.sh')
@@ -140,7 +129,7 @@ ospackage {
     directory(prefix_path + '/lib', 755)
     directory(prefix_path + '/bin', 755)
 
-    // pull our configs from src/main/resources
+    // pull our configs and wadl from src/main/resources
     from('src/main/resources') {
         into config_path
         exclude 'preferences-service.init' // exclude init script
@@ -149,12 +138,12 @@ ospackage {
         user app_user
         group app_group
         fileMode 0644
-        fileType CONFIG
+        fileType CONFIG | NOREPLACE
     }
 
     into prefix_path
 
-    // configs and wadl
+    // pull our init script 
     from('src/main/resources') {
         into 'bin'
         include 'preferences-service.init'
@@ -186,7 +175,7 @@ ospackage {
 }
 
 // task to create RPM
-task buildRpm(type: Rpm, dependsOn: 'build') {
+task buildRpm(type: Rpm, dependsOn: 'uberjar') {
     // this task inherits defaults from the ospackage section
 
     // the init script uses daemonize, require it
@@ -195,3 +184,24 @@ task buildRpm(type: Rpm, dependsOn: 'build') {
     // symlink for the init script
     link('/etc/init.d/' + app_name, prefix_path + '/bin/preferences-service.init')
 }
+
+artifacts {
+    archives(buildRpm) {
+        name   app_name
+        type   'rpm'
+        builtBy buildRpm
+    }
+}
+
+release {
+    failOnPublishNeeded = false
+    failOnCommitNeeded = false
+    failOnUnversionedFiles = false
+    tagPrefix = 'cloudfeeds-preferences-svc'
+    git.requireBranch = 'CF-293_prefs_rpm_release'
+}
+
+// 'gradle release' will also upload release to Nexus
+uploadArchives.dependsOn   uberjar
+createReleaseTag.dependsOn uploadArchives
+
