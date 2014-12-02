@@ -198,6 +198,7 @@ release {
     failOnCommitNeeded = false
     failOnUnversionedFiles = false
     tagPrefix = 'cloudfeeds-preferences-svc'
+    git.requireBranch = 'CF-293_prefs_rpm_release'
 }
 
 // 'gradle release' will also upload release to Nexus
