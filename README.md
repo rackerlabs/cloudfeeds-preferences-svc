@@ -56,16 +56,16 @@ scutil --set "HostName" localhost
 The Cloud Feeds Preferences Service uses the following configuration files:
 
 ### preferences-service.conf
-This (preferences-service.conf)[https://github.com/rackerlabs/cloudfeeds-preferences-svc/blob/master/src/main/resources/preferences-service.conf] file configures the Preferences Service app itself. 
+This [preferences-service.conf](https://github.com/rackerlabs/cloudfeeds-preferences-svc/blob/master/src/main/resources/preferences-service.conf) file configures the Preferences Service app itself. 
 
 By default, the Preferences Service app will try to find this file from classpath. This can be overriden by specifying the Java System properties ```-Dconfig.file=<path_to_file>```.
 
 ### c3p0-config.xml
-This (c3p0-config.xml)[https://github.com/rackerlabs/cloudfeeds-preferences-svc/blob/master/src/main/resources/c3p0-config.xml] file has the C3P0 Connection Pool configuration.
+This [c3p0-config.xml](https://github.com/rackerlabs/cloudfeeds-preferences-svc/blob/master/src/main/resources/c3p0-config.xml) file has the C3P0 Connection Pool configuration.
 
 By default, the Preferences Service app will try to load this file from classpath. This can be overriden by editing the ```preferences-service.conf``` file above.
 
 ### logback.xml
-This (logback.xml)[https://github.com/rackerlabs/cloudfeeds-preferences-svc/blob/master/src/main/resources/c3p0-config.xml] file has the logging related configuration.
+This [logback.xml](https://github.com/rackerlabs/cloudfeeds-preferences-svc/blob/master/src/main/resources/c3p0-config.xml) file has the logging related configuration.
 
 By default, the Preferencs Service app will try to load this file from classpath. This can be overriden by editing the ```preferences-service.conf``` file above.
