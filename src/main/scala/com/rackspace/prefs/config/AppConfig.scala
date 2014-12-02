@@ -43,6 +43,12 @@ object AppConfig {
   object Scalatra {
     val environment = config.getString("appConfig.scalatra.environment")
   }
+
+  object Log {
+    private val log = config.getConfig("appConfig.log")
+
+    val configFile = log.getString("configFile")
+  }
 }
 
 
