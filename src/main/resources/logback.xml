@@ -1,4 +1,4 @@
-<configuration debug="true">
+<configuration>
     <!-- See also http://logback.qos.ch/manual/appenders.html#RollingFileAppender -->
     <appender name="defaultFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <File>/var/log/preferences-service/preferences-service.log</File>
