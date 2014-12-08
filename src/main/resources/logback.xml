@@ -16,7 +16,14 @@
         </rollingPolicy>
     </appender>
 
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-4r [%t] %-5p %c - %m%n</pattern>
+        </encoder>
+    </appender>
+
     <root level="INFO">
         <appender-ref ref="defaultFile" />
+        <!--<appender-ref ref="STDOUT" />-->
     </root>
 </configuration>

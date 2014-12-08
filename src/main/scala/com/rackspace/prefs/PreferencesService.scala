@@ -1,16 +1,16 @@
 package com.rackspace.prefs
 
-import com.rackspace.prefs.model.ResourceTypeMetadata
-import com.rackspace.prefs.model.AttributeMetadata
-import com.rackspace.prefs.model.ResourceInstance
 import com.rackspace.prefs.model.DBTables._
-import scala.slick.jdbc.JdbcBackend.Database.dynamicSession
-import org.scalatra.ScalatraServlet
-import org.scalatra.scalate.ScalateSupport
+import com.rackspace.prefs.model.{Preferences, PreferencesMetadata}
+import org.joda.time.DateTime
 import org.json4s.{DefaultFormats, Formats}
+import org.scalatra.ScalatraServlet
 import org.scalatra.json._
-import scala.slick.jdbc.JdbcBackend.Database
+import org.scalatra.scalate.ScalateSupport
+
 import scala.slick.driver.JdbcDriver.simple._
+import scala.slick.jdbc.JdbcBackend.Database
+import scala.slick.jdbc.JdbcBackend.Database.dynamicSession
 
 case class PreferencesService(db: Database) extends ScalatraServlet
       with ScalateSupport
@@ -18,83 +18,43 @@ case class PreferencesService(db: Database) extends ScalatraServlet
 
   protected implicit val jsonFormats: Formats = DefaultFormats
 
-  def dbSetup {
-    db withDynSession {
-      (resourceTypes.ddl ++ resourceAttributes.ddl ++ resources.ddl).create
-
-      resourceTypes.insert("archive_prefs", "Archive Preferences", "cloud_account_id")
-
-      //(id, resourceType, key, valueType, use, validation)
-      resourceAttributes.insertAll(
-        (1, "archive_prefs", "archiving_state", "String", "optional", "in (enabled, disabled)"),
-        (2, "archive_prefs", "data_format", "String", "optional", "in (xml, json, xml+json)")
-      )
-
-      //(resourceType, id ,payload)
-      resources.insert("archive_prefs","tenant_1", "{\"todo\": \"add JSON goodness\"}")
-    }
-  }
-
   get("/") {
     <html><body>
-      Hello World! Hello Universe!
+      Preferences Service!
       {if (isDevelopmentMode) <h3>Dev Mode</h3>}
-    </body></html>
-  }
-    
-  get("/hello/:name") {
-    <html><body>Hello {params("name")}</body></html>
-  }
-    
-  get("/oldmetadata") {
-    <html><body>
-      Want some metadata?<p/>
-      Then go <a href="/metadata/archive_prefs">here</a>.
     </body></html>
   }
 
   get("/metadata") {
     contentType = formats("json")
-    db withDynSession {resourceTypes.run.map(m => ResourceTypeMetadata(m._1, m._2, m._3))}
+    db withDynSession { preferencesMetadata.list.map(m => (m.slug, m.schema)) }
   }
 
 
-  get("/metadata/:resource_type") {
-    val resource_type = params("resource_type")
+  get("/metadata/:preference_type") {
+    val preferenceType = params("preference_type")
     contentType = formats("json")
     db withDynSession {
-      resourceAttributes.filter(_.resourceType === resource_type).run.map(m =>
-        AttributeMetadata(m._3, m._4, m._5, m._6)
-      )
+      preferencesMetadata.filter(_.slug === preferenceType).run
     }
   }
-    
+
   get("/archive_prefs/:id") {
     val id = params("id")
     db withDynSession {
-      resources.filter(_.id === id).run.map(m => m._3).head
+      preferences.filter(_.id === id).run
     }
   }
 
-  post("/:resourceType/:id") {
-    val resourceType = params("resourceType")
+  post("/:preference_type/:id") {
+    val preferenceType = params("preference_type")
     val id = params("id")
     val payload = request.body
-    db withDynSession {
-      if (resources.filter(_.id === id).run.isEmpty)
-        resources.insert(resourceType, id, payload)
-      else
-        resources
-          .filter(r => r.resourceType === resourceType && r.id === id)
-          .map(r => (r.payload))
-          .update((payload))
-    }
-    //val instance: ResourceInstance = parsedBody.extract[ResourceInstance]
-    //resources.insertOrUpdate( (instance.resourceType, instance.id, instance.payload) )
+
+    //TODO: Implement actual save to database
+    Preferences(id, preferenceType, payload,
+      Option(DateTime.now), Option(DateTime.now))
   }
 
-  get("/setup") {
-    dbSetup
-  }
 
 }

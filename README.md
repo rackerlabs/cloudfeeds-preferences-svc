@@ -39,6 +39,16 @@ gradle clean installApp
 gradle clean buildRpm
 ```
 
+## Setup
+
+For development purpose, the repo comes with a sample H2 database which should be copied to the path specified in c3p0-config.xml before running the app.
+
+```
+cp src/main/db/* ~/                                        
+```
+
+Note: The current c3p0-config.xml file in classpath expects this file in home directory. You can change ```jdbcUrl``` property to point to the location of your database.
+
 ## How to run the App
 Run the build to create an installable app. Then you should have a startup script in the ```build``` directory, which you can run:
 ```
