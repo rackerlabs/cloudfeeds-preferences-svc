@@ -1,0 +1,13 @@
+object {
+    boolean enabled;
+    string  data_format [ "JSON", "XML" ];
+    string  default_container_name = "FeedsArchives";
+    object {
+        string iad;
+        string ord;
+        string dfw;
+        string lon;
+        string hkg;
+        string syd;
+    } archive_container_urls?;
+}*;

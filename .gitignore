@@ -14,3 +14,4 @@ build
 *.lock
 *.DS_Store
 *.swp
+*.log
