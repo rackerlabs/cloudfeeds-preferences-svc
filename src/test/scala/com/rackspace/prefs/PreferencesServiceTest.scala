@@ -1,31 +1,27 @@
 package com.rackspace.prefs
 
-import org.scalatra.test.scalatest._
-import org.scalatest.FunSuiteLike
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
-import scala.slick.jdbc.JdbcBackend.Database
-import scala.slick.jdbc.JdbcBackend.Database.dynamicSession
-import scala.slick.driver.JdbcDriver.simple._
 import com.mchange.v2.c3p0.ComboPooledDataSource
 import com.rackspace.prefs.model.InitDbTrait
-import com.rackspace.prefs.config.AppConfig
-import com.rackspace.prefs.model.DBTables._
+import org.junit.runner.RunWith
+import org.scalatest.FunSuiteLike
+import org.scalatest.junit.JUnitRunner
+import org.scalatra.test.scalatest._
+
+import scala.slick.jdbc.JdbcBackend.Database
 
 /**
  * User: shin4590
  * Date: 12/4/14
  */
 @RunWith(classOf[JUnitRunner])
-class PreferencesServiceTest extends ScalatraSuite with FunSuiteLike {
+class PreferencesServiceTest extends ScalatraSuite with FunSuiteLike with InitDbTrait {
 
     val db = Database.forDataSource(new ComboPooledDataSource)
     addServlet(new PreferencesService(db), "/*")
 
     override def beforeAll {
-        db withDynSession {
-            (resourceTypes.ddl ++ resourceAttributes.ddl ++ resources.ddl).create
-        }
+        super.beforeAll
+        createSchema(db)
     }
 
     test("get of /") {
