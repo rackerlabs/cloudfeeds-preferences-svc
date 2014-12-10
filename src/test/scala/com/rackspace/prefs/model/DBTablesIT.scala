@@ -96,11 +96,6 @@ class DBTablesIT extends FunSuite with BeforeAndAfterAll with InitDbTrait {
     }
   }
 
-  test ("create") {
-    clearData()
-    initMetaData(db)
-  }
-
   override def afterAll {
     pooledDataSource.close
   }

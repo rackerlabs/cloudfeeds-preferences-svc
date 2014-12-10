@@ -12,12 +12,8 @@ trait InitDbTrait {
 
     def createSchema(db: Database) {
 
-        db withDynSession {
-            val ddl = preferencesMetadata.ddl ++ preferences.ddl
-            ddl.createStatements.foreach(println)
-
-            ddl.create
-        }
+    db withDynSession {
+      (preferencesMetadata.ddl ++ preferences.ddl).create
     }
 
     def initMetaData(db: Database) {
