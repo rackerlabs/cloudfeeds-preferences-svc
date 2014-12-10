@@ -5,6 +5,8 @@ import java.sql.Timestamp
 import org.joda.time.DateTime
 
 import scala.slick.driver.JdbcDriver.simple._
+import scala.slick.direct.AnnotationMapper.column
+import scala.slick.lifted.TableQuery
 
 
 object DBTables {

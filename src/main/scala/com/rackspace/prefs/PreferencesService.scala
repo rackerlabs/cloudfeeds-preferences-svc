@@ -4,7 +4,7 @@ import com.rackspace.prefs.model.DBTables._
 import com.rackspace.prefs.model.{Preferences, PreferencesMetadata}
 import org.joda.time.DateTime
 import org.json4s.{DefaultFormats, Formats}
-import org.scalatra.{Created, ScalatraServlet}
+import org.scalatra.{Ok, Created, NotFound, ScalatraServlet}
 import org.scalatra.json._
 import org.scalatra.scalate.ScalateSupport
 
@@ -52,14 +52,21 @@ with JacksonJsonSupport {
         val preferenceType = params("preference_type")
         contentType = "application/schema+json"
         db withDynSession {
-            preferencesMetadata.filter(_.slug === preferenceType).run
+            val result = preferencesMetadata.filter(_.slug === preferenceType).run
+            if ( result.length != 1 ) {
+                NotFound("Metadata preferences for " + preferenceType + " not found")
+            } else {
+                result(0).schema
+            }
         }
     }
 
     get("/archive_prefs/:id") {
+        //val preferenceType = params("preference_type")
+        val preferenceType = "archive_prefs"
         val id = params("id")
         db withDynSession {
-            val result = preferences.filter(_.id === id).run
+            val result = preferences.filter( prefs => prefs.id === id && prefs.preferencesMetadataSlug === preferenceType).run
             result(0)
         }
     }
@@ -82,8 +89,7 @@ with JacksonJsonSupport {
                     .update((payload, DateTime.now()))
         }
 
-        //TODO: Handle error scenarios and set property response code
-        Unit
+        Created("")
     }
 
     def validate(payload: String) {
