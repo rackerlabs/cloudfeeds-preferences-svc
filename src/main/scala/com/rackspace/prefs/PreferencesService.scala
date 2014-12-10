@@ -4,7 +4,7 @@ import com.rackspace.prefs.model.DBTables._
 import com.rackspace.prefs.model.{Preferences, PreferencesMetadata}
 import org.joda.time.DateTime
 import org.json4s.{DefaultFormats, Formats}
-import org.scalatra.ScalatraServlet
+import org.scalatra.{Created, ScalatraServlet}
 import org.scalatra.json._
 import org.scalatra.scalate.ScalateSupport
 
@@ -64,29 +64,26 @@ with JacksonJsonSupport {
         }
     }
 
-    post("/:preference_type/:id", request.getContentType() == "application/json") {
-        val preferenceType = params("preference_type")
+    post("/:preference_slug/:id", request.getContentType() == "application/json") {
+        val preferenceSlug = params("preference_slug")
         val id = params("id")
         val payload = request.body
 
         val violations = validate(payload)
-        val currentTime = new DateTime()
 
         db withDynSession {
             if (preferences.filter(_.id === id).run.isEmpty)
-                preferences += Preferences(id, preferenceType, payload,
-                    Option(currentTime), Option(currentTime))
+                preferences.map(p => (p.id, p.preferencesMetadataSlug, p.payload))
+                           .insert(id, preferenceSlug, payload)
             else
                 preferences
-                    .filter(r => r.preferencesMetadataSlug === preferenceType && r.id === id)
-                    .map(r => (r.payload))
-                    .update((payload))
+                    .filter(r => r.preferencesMetadataSlug === preferenceSlug && r.id === id)
+                    .map(r => (r.payload, r.updated))
+                    .update((payload, DateTime.now()))
         }
-        //val instance: ResourceInstance = parsedBody.extract[ResourceInstance]
-        //resources.insertOrUpdate( (instance.resourceType, instance.id, instance.payload) )
-        //TODO: Implement actual save to database
-        //Preferences(id, preferenceType, payload,
-        //    Option(DateTime.now), Option(DateTime.now))
+
+        //TODO: Handle error scenarios and set property response code
+        Unit
     }
 
     def validate(payload: String) {
