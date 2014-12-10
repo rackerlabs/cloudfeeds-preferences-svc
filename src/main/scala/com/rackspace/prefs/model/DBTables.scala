@@ -1,41 +1,47 @@
 package com.rackspace.prefs.model
 
+import java.sql.Timestamp
+
+import org.joda.time.DateTime
+
 import scala.slick.driver.JdbcDriver.simple._
+
 
 object DBTables {
 
-  class ResourceTypes(tag: Tag)
-  extends Table[(String, String, String)](tag, "RESOURCE_TYPES") {
-    def slug = column[String]("SLUG", O.PrimaryKey)
-    def name = column[String]("NAME")
-    def identifier = column[String]("IDENTIFIER")
-    def * = (slug, name, identifier)
+  //org.joda.time.DateTime -> java.sql.Timestamp mapper
+  implicit def dateTime2TimeStamp  = MappedColumnType.base[DateTime, Timestamp](
+    dt => new Timestamp(dt.getMillis),
+    ts => new DateTime(ts.getTime)
+  )
+
+  class PreferencesMetadataTable(tag: Tag)
+    extends Table[PreferencesMetadata](tag, "PREFERENCES_METADATA") {
+
+    def slug = column[String]("SLUG", O.PrimaryKey, O.DBType("VARCHAR"))
+    def description = column[String]("DESCRIPTION", O.DBType("VARCHAR"))
+    def schema = column[String]("SCHEMA", O.DBType("VARCHAR"))
+    def * = (slug, description, schema) <>
+      (PreferencesMetadata.tupled, PreferencesMetadata.unapply)
   }
-  val resourceTypes = TableQuery[ResourceTypes]
+  val preferencesMetadata = TableQuery[PreferencesMetadataTable]
 
-  class ResourceAttributes(tag: Tag) extends Table[(Int, String, String, String, String, String)](tag, "RESOURCE_ATTRIBUTES") {
-    def id = column[Int]("ID", O.PrimaryKey)
-    def resourceType = column[String]("RESOURCE_TYPE")
-    def key = column[String]("KEY")
-    def valueType = column[String]("VALUE_TYPE")
-    def use = column[String]("USE")
-    def validation = column[String]("VALIDATION")
+  class PreferencesTable(tag: Tag)
+    extends Table[Preferences](tag, "PREFERENCES") {
 
-    def * = (id, resourceType, key, valueType, use, validation)
+    def id = column[String]("ID", O.DBType("VARCHAR"))
+    def preferencesMetadataSlug = column[String]("PREFERENCES_METADATA_SLUG", O.DBType("VARCHAR"))
+    def payload = column[String]("PAYLOAD", O.DBType("VARCHAR"))
 
-    def slug = foreignKey("ATTRIBUTE_SLUG_FK", resourceType, resourceTypes)(_.slug)
+    def created = column[DateTime]("CREATED", O.NotNull)
+    def updated = column[DateTime]("UPDATED", O.NotNull)
+
+    override def * = (id ,preferencesMetadataSlug, payload, created.?, updated.?) <>
+      (Preferences.tupled, Preferences.unapply)
+
+    def pk = primaryKey("compound_pk", (id, preferencesMetadataSlug))
+    def slug = foreignKey("PREFERENCES_METADATA_SLUG_FK", preferencesMetadataSlug, preferencesMetadata)(_.slug)
   }
-  val resourceAttributes = TableQuery[ResourceAttributes]
 
-  class Resources(tag: Tag) extends Table[(String, String, String)](tag, "RESOURCES") {
-    def resourceType = column[String]("RESOURCE_TYPE")
-    def id = column[String]("ID")
-    def payload = column[String]("PAYLOAD")
-    def * = (resourceType, id ,payload)
-
-    def pk = primaryKey("compound_pk", (resourceType, id))
-    def slug = foreignKey("RESOURCE_SLUG_FK", resourceType, resourceTypes)(_.slug)
-  }
-  val resources = TableQuery[Resources]
-
+  val preferences = TableQuery[PreferencesTable]
 }
