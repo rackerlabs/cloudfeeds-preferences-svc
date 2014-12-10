@@ -1,13 +1,15 @@
 package com.rackspace.prefs
 
 import com.mchange.v2.c3p0.ComboPooledDataSource
-import com.rackspace.prefs.model.InitDbTrait
+import com.rackspace.prefs.model.{PreferencesMetadata, InitDbTrait}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuiteLike
 import org.scalatest.junit.JUnitRunner
 import org.scalatra.test.scalatest._
 
 import scala.slick.jdbc.JdbcBackend.Database
+import com.rackspace.prefs.model.DBTables._
+import scala.io.Source
 
 /**
  * User: shin4590
@@ -19,9 +21,12 @@ class PreferencesServiceTest extends ScalatraSuite with FunSuiteLike with InitDb
     val db = Database.forDataSource(new ComboPooledDataSource)
     addServlet(new PreferencesService(db), "/*")
 
+    val schema = Source.fromInputStream(getClass().getResourceAsStream("/feeds_archives.schema.orderly")).getLines().mkString
+
     override def beforeAll {
         super.beforeAll
         createSchema(db)
+        initMetaData(db, schema)
     }
 
     test("get of /") {
@@ -32,6 +37,14 @@ class PreferencesServiceTest extends ScalatraSuite with FunSuiteLike with InitDb
 
     test("get of /metadata") {
         get("/metadata") {
+            println(body)
+            status should equal (200)
+        }
+    }
+
+    test("get of /metadata/archive_prefs") {
+        get("/metadata/archive_prefs") {
+            println(body)
             status should equal (200)
         }
     }
@@ -53,6 +66,7 @@ class PreferencesServiceTest extends ScalatraSuite with FunSuiteLike with InitDb
               |  }
               |}
             """.stripMargin, Map("Content-Type" -> "application/json")) {
+            println(body)
             status should equal (200)
         }
     }

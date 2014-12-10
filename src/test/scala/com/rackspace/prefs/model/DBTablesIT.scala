@@ -3,6 +3,7 @@ package com.rackspace.prefs.model
 import com.mchange.v2.c3p0.ComboPooledDataSource
 import com.rackspace.prefs.model.DBTables._
 import org.h2.jdbc.JdbcSQLException
+import org.joda.time.DateTime
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 import org.slf4j.LoggerFactory
 
@@ -10,6 +11,7 @@ import scala.slick.driver.JdbcDriver.simple._
 import scala.slick.jdbc.JdbcBackend.Database
 import scala.slick.jdbc.JdbcBackend.Database.dynamicSession
 import scala.slick.jdbc.meta.MTable
+
 
 class DBTablesIT extends FunSuite with BeforeAndAfterAll with InitDbTrait {
 
@@ -27,79 +29,58 @@ class DBTablesIT extends FunSuite with BeforeAndAfterAll with InitDbTrait {
       MTable.getTables.list
     }
 
-    assert(tables.size == 3)
-    assert(tables.count(_.name.name.equalsIgnoreCase("RESOURCE_TYPES")) == 1, "RESOURCE_TYPES table is not created")
-    assert(tables.count(_.name.name.equalsIgnoreCase("RESOURCE_ATTRIBUTES")) == 1, "RESOURCE_ATTRIBUTES table is not created")
-    assert(tables.count(_.name.name.equalsIgnoreCase("RESOURCES")) == 1, "RESOURCES table is not created")
+    assert(tables.size == 2)
+    assert(tables.count(_.name.name.equalsIgnoreCase("PREFERENCES")) == 1, "PREFERENCES table is not created")
+    assert(tables.count(_.name.name.equalsIgnoreCase("PREFERENCES_METADATA")) == 1, "PREFERENCES_METADATA table is not created")
   }
 
-  test ("Verify insertion of data into RESOURCE_TYPES table") {
+  test ("Verify insertion of data into PREFERENCES_METADATA table") {
     clearData()
 
     db withDynSession {
-      resourceTypes += (ResourceTypeSlub, "Archive Preferences", "cloud_account_id")
+      preferencesMetadata += PreferencesMetadata(ArchivePrefsMetadataSlug, "Cloud feeds Archive Preferences", "{\"schema\": \"JSON schema\"}")
     }
 
-    val isArchiveResourceTypeExist = db withDynSession {
-      resourceTypes.filter(_.slug === ResourceTypeSlub).run.nonEmpty
+    val hasPreferenceMetadata = db withDynSession {
+      preferencesMetadata.filter(_.slug === ArchivePrefsMetadataSlug).run.nonEmpty
     }
 
-    assert(isArchiveResourceTypeExist, "row not inserted in RESOURCE_TYPES table")
+    assert(hasPreferenceMetadata, "row not inserted in PREFERENCES_METADATA table")
   }
 
-  test ("Verify foreign key constraint of table RESOURCE_ATTRIBUTES") {
-    clearData()
-
-    try {
-      db withDynSession {
-        resourceAttributes +=(1, ResourceTypeSlub, ArchivingStateResourceType, "String", "optional", "in (enabled, disabled)")
-      }
-      fail() //This will trigger failure if the above insert does not fail
-    }
-    catch {
-      case _: JdbcSQLException =>    // Expected as there is foreign key constraint violation
-    }
-  }
-
-  test ("Verify insertion of data into table RESOURCE_ATTRIBUTES") {
-    clearData()
-    initMetaData(db)
-
-    val isArchivingStateResourceAttrExist = db withDynSession {
-      resourceAttributes.filter(_.key === ArchivingStateResourceType).run.nonEmpty
-    }
-
-    assert(isArchivingStateResourceAttrExist, "row not inserted in RESOURCE_ATTRIBUTES table")
-  }
-
-
-  test ("Verify insertion of data into table RESOURCES") {
+  test ("Verify insertion of data into table PREFERENCES") {
     clearData()
     initMetaData(db)
 
     val tenantId = "tenant_1"
+    val currentTime = new DateTime()
 
     db withDynSession {
-      resources += (ResourceTypeSlub, tenantId, "{\"todo\": \"add JSON goodness\"}")
+      //current time and updated time should be inserted by database definition.
+      preferences += Preferences(tenantId, ArchivePrefsMetadataSlug, "{\"payload\": \"JSON blob\"}",
+        Option(currentTime), Option(currentTime))
     }
 
-    val isTenantResourceExist = db withDynSession {
-      resources.filter(_.id === tenantId).run.nonEmpty
+    val hasTenantPreference = db withDynSession {
+      preferences.filter(_.id === tenantId).run.nonEmpty
     }
 
-    assert(isTenantResourceExist, "row not inserted in table RESOURCES")
+    assert(hasTenantPreference, "row not inserted in table PREFERENCES")
   }
 
-  test ("Verify only unique combinations of resourceType/tenantId can be inserted into RESOURCES table") {
+  test ("Verify only unique combinations of tenantId/preferenceMetadata can be inserted into PREFERENCES table") {
     clearData()
     initMetaData(db)
 
     val tenantId = "tenant_1"
+    val currentTime = new DateTime()
 
+    val archivePrefs = Preferences(tenantId, ArchivePrefsMetadataSlug, "{\"payload\": \"JSON blob\"}",
+      Option(currentTime), Option(currentTime))
     try {
       db withDynSession {
-        resources +=(ResourceTypeSlub, tenantId, "{\"todo\": \"add JSON goodness\"}")
-        resources +=(ResourceTypeSlub, tenantId, "{\"todo\": \"add JSON goodness\"}")
+        preferences += archivePrefs
+        preferences += archivePrefs
       }
       fail()  //This will trigger failure if the above insert does not fail
     }
@@ -110,10 +91,14 @@ class DBTablesIT extends FunSuite with BeforeAndAfterAll with InitDbTrait {
 
   def clearData() {
     db withDynSession {
-      resources.delete
-      resourceAttributes.delete
-      resourceTypes.delete
+      preferences.delete
+      preferencesMetadata.delete
     }
+  }
+
+  test ("create") {
+    clearData()
+    initMetaData(db)
   }
 
   override def afterAll {

@@ -67,6 +67,7 @@ dependencies {
     compile 'javax.servlet:javax.servlet-api:3.0.1'
     compile 'com.nparry:orderly_2.10:1.0.6'
     compile 'com.github.fge:json-schema-validator:2.2.6'
+    compile 'joda-time:joda-time:2.6'
     testCompile 'org.scalatest:scalatest_2.10:2.1.7'
     testCompile 'org.scalatra:scalatra-scalatest_2.10:2.2.2'
 }
@@ -148,7 +149,7 @@ ospackage {
 
     into prefix_path
 
-    // pull our init script 
+    // pull our init script
     from('src/main/resources') {
         into 'bin'
         include 'preferences-service.init'
@@ -203,7 +204,6 @@ release {
     failOnCommitNeeded = false
     failOnUnversionedFiles = false
     tagPrefix = 'cloudfeeds-preferences-svc'
-    git.requireBranch = 'CF-293_prefs_rpm_release'
 }
 
 // 'gradle release' will also upload release to Nexus

@@ -24,7 +24,7 @@
         </rollingPolicy>
     </appender>
 
-    <root level="DEBUG">
+    <root level="INFO">
         <appender-ref ref="defaultFile" />
         <appender-ref ref="STDOUT" />
     </root>
