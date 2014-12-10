@@ -12,8 +12,9 @@ trait InitDbTrait {
 
     def createSchema(db: Database) {
 
-    db withDynSession {
-      (preferencesMetadata.ddl ++ preferences.ddl).create
+        db withDynSession {
+          (preferencesMetadata.ddl ++ preferences.ddl).create
+        }
     }
 
     def initMetaData(db: Database) {
