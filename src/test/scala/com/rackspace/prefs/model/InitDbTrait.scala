@@ -13,10 +13,7 @@ trait InitDbTrait {
   def createSchema(db: Database) {
 
     db withDynSession {
-      val ddl = preferencesMetadata.ddl ++ preferences.ddl
-      ddl.createStatements.foreach(println)
-
-      ddl.create
+      (preferencesMetadata.ddl ++ preferences.ddl).create
     }
   }
 
