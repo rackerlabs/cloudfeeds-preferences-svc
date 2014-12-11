@@ -4,7 +4,7 @@ import com.rackspace.prefs.model.DBTables._
 import com.rackspace.prefs.model.{Preferences, PreferencesMetadata}
 import org.joda.time.DateTime
 import org.json4s.{DefaultFormats, Formats}
-import org.scalatra.{Ok, Created, NotFound, ScalatraServlet}
+import org.scalatra._
 import org.scalatra.json._
 import org.scalatra.scalate.ScalateSupport
 
@@ -53,21 +53,26 @@ with JacksonJsonSupport {
         contentType = "application/schema+json"
         db withDynSession {
             val result = preferencesMetadata.filter(_.slug === preferenceType).run
-            if ( result.length != 1 ) {
-                NotFound("Metadata preferences for " + preferenceType + " not found")
-            } else {
+            if ( result.length == 1 ) {
                 result(0).schema
+            } else {
+                NotFound("Metadata preferences for " + preferenceType + " not found")
             }
         }
     }
 
-    get("/archive_prefs/:id") {
-        //val preferenceType = params("preference_type")
-        val preferenceType = "archive_prefs"
-        val id = params("id")
+    // anything that's not /metadata* goes here
+    get("""^/(?!metadata)(.*)/(.*)""".r) {
+        val uriParts = multiParams("captures")
+        val preferenceType = uriParts(0)
+        val id = uriParts(1)
         db withDynSession {
             val result = preferences.filter( prefs => prefs.id === id && prefs.preferencesMetadataSlug === preferenceType).run
-            result(0)
+            if ( result.length == 1 ) {
+                result(0).payload
+            } else {
+                NotFound("Preferences for " + preferenceType + " with id " + id + " not found")
+            }
         }
     }
 
@@ -76,25 +81,22 @@ with JacksonJsonSupport {
         val id = params("id")
         val payload = request.body
 
-        val violations = validate(payload)
+        val violations = orderly.validate(payload)
+        if ( violations.length == 0 ) {
+            db withDynSession {
+                if (preferences.filter(_.id === id).run.isEmpty)
+                    preferences.map(p => (p.id, p.preferencesMetadataSlug, p.payload))
+                               .insert(id, preferenceSlug, payload)
+                else
+                    preferences
+                        .filter(r => r.preferencesMetadataSlug === preferenceSlug && r.id === id)
+                        .map(r => (r.payload, r.updated))
+                        .update((payload, DateTime.now()))
+            }
 
-        db withDynSession {
-            if (preferences.filter(_.id === id).run.isEmpty)
-                preferences.map(p => (p.id, p.preferencesMetadataSlug, p.payload))
-                           .insert(id, preferenceSlug, payload)
-            else
-                preferences
-                    .filter(r => r.preferencesMetadataSlug === preferenceSlug && r.id === id)
-                    .map(r => (r.payload, r.updated))
-                    .update((payload, DateTime.now()))
+            Created("")
+        } else {
+            BadRequest("Preferences /${preferenceSlug}/${id} does not validate properly")
         }
-
-        Created("")
-    }
-
-    def validate(payload: String) {
-//        val jsonNode = objMapper.readTree(payload)
-//        schema.validate(jsonNode)
-        orderly.validate(payload)
     }
 }

@@ -72,7 +72,7 @@ class PreferencesServiceTest extends ScalatraSuite with FunSuiteLike with InitDb
         }
     }
 
-    test("post of a good preferences to /archive_prefs/100") {
+    test("post of a good preferences to not yet existed /archive_prefs/100") {
         post("/archive_prefs/100",
             """
               |{
@@ -91,6 +91,28 @@ class PreferencesServiceTest extends ScalatraSuite with FunSuiteLike with InitDb
             """.stripMargin, Map("Content-Type" -> "application/json")) {
             println(body)
             status should equal (201)
+        }
+    }
+
+    test("post of preferences with unknown field to /archive_prefs/101") {
+        post("/archive_prefs/101",
+            """
+              |{
+              |  "some_unknown_field": 12345,
+              |  "data_format" : [ "JSON", "XML" ],
+              |  "default_container_name" : "FeedsArchives",
+              |  "archive_containers": {
+              |      "iad": "http://...",
+              |      "dfw": "http://...",
+              |      "ord": "http://...",
+              |      "lon": "http://...",
+              |      "hkg": "http://...",
+              |      "syd": "http://..."
+              |  }
+              |}
+            """.stripMargin, Map("Content-Type" -> "application/json")) {
+            println(body)
+            status should equal (400)
         }
     }
 }

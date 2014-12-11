@@ -1,6 +1,9 @@
 object {
     boolean enabled;
-    string  data_format [ "JSON", "XML" ];
+    array {
+        string [ "JSON" , "XML" ];
+        string [ "JSON" , "XML" ]?;
+    } data_format;
     string  default_container_name = "FeedsArchives";
     object {
         string iad;
