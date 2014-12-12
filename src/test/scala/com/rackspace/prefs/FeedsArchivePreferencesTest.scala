@@ -56,6 +56,21 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
         }
     }
 
+    test("should get 404: GET on nonexistent preferences /nonexistent/:id") {
+        val randomId = Random.nextInt()
+        info("Calling GET /nonexistent/" + randomId)
+        get("/nonexistent/" + randomId) {
+            status should equal (404)
+        }
+    }
+
+    test("should get 404: GET on preferences without id /archive_prefs") {
+        info("Calling GET /archive_prefs")
+        get("/archive_prefs") {
+            status should equal (404)
+        }
+    }
+
     test("should get 201: POST of a new good preferences to /archive_prefs/:id") {
         val randomId = Random.nextInt()
         info("Calling POST /archive_prefs/" + randomId)
