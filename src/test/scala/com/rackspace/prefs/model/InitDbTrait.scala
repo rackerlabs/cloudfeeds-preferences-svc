@@ -49,4 +49,10 @@ trait InitDbTrait {
         }
     }
 
+    def deleteSchema(db: Database) {
+        db withDynSession {
+            (preferencesMetadata.ddl ++ preferences.ddl).drop
+        }
+    }
+
 }

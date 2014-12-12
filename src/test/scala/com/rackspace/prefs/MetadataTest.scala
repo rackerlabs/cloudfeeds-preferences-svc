@@ -56,4 +56,9 @@ class MetadataTest extends ScalatraSuite with FunSuiteLike with InitDbTrait {
         }
     }
 
+    override def afterAll() {
+        super.afterAll()
+        deleteSchema(db)
+    }
+
 }

@@ -231,4 +231,9 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
             body should include ("does not match any enum value")
         }
     }
+
+    override def afterAll() {
+        super.afterAll()
+        deleteSchema(db)
+    }
 }
