@@ -16,7 +16,6 @@ import com.github.fge.jackson.JsonLoader
 import com.fasterxml.jackson.databind.{ObjectMapper, JsonNode}
 import com.nparry.orderly._
 import net.liftweb.json.JsonAST._
-import scala.io.Source
 
 case class PreferencesService(db: Database) extends ScalatraServlet
 with ScalateSupport
@@ -29,9 +28,6 @@ with JacksonJsonSupport {
     val schemaObj = JsonLoader.fromResource("/feeds_archives.schema.json")
     val schemaFactory = JsonSchemaFactory.byDefault()
     val schema = schemaFactory.getJsonSchema(schemaObj)
-
-    // using Lift and Orderly
-    val orderly = Orderly(Source.fromInputStream(getClass().getResourceAsStream("/feeds_archives.schema.orderly")).getLines().mkString)
 
     get("/") {
         <html><body>
@@ -79,30 +75,33 @@ with JacksonJsonSupport {
         val id = params("id")
         val payload = request.body
 
-        val schema = getSchema(preferenceSlug)
-
-        val orderly = Orderly(schema)
-        val violations = orderly.validate(payload)
-        if ( violations.length == 0 ) {
-            db withDynSession {
-                val result = preferences.filter(prefs => prefs.preferencesMetadataSlug === preferenceSlug && prefs.id === id).run
-                if (preferences.filter(prefs => prefs.preferencesMetadataSlug === preferenceSlug && prefs.id === id).run.isEmpty) {
-                    preferences.map(p => (p.id, p.preferencesMetadataSlug, p.payload))
-                               .insert(id, preferenceSlug, payload)
-                    Created("")
+        getSchema(preferenceSlug) match {
+            case ""      => BadRequest("Preferences for /" + preferenceSlug + " does not have any metadata")
+            case schema  => {
+                val orderly = Orderly(schema)
+                val violations = orderly.validate(payload)
+                if ( violations.length > 0 ) {
+                    // give them hints of what's wrong. Only print the first violation.
+                    val first: Violation = violations(0)
+                    BadRequest("Preferences for /" + preferenceSlug + "/" + id +
+                               " does not validate properly. " + first.path + " " + first.message)
                 } else {
-                    preferences
-                        .filter(prefs => prefs.preferencesMetadataSlug === preferenceSlug && prefs.id === id)
-                        .map(p => (p.payload, p.updated))
-                        .update((payload, DateTime.now()))
-                    Ok()
+                    db withDynSession {
+                        val result = preferences.filter(prefs => prefs.preferencesMetadataSlug === preferenceSlug && prefs.id === id).run
+                        if (preferences.filter(prefs => prefs.preferencesMetadataSlug === preferenceSlug && prefs.id === id).run.isEmpty) {
+                            preferences.map(p => (p.id, p.preferencesMetadataSlug, p.payload))
+                                       .insert(id, preferenceSlug, payload)
+                            Created("")
+                        } else {
+                            preferences
+                                .filter(prefs => prefs.preferencesMetadataSlug === preferenceSlug && prefs.id === id)
+                                .map(p => (p.payload, p.updated))
+                                .update((payload, DateTime.now()))
+                            Ok()
+                        }
+                    }
                 }
             }
-        } else {
-            // give them hints of what's wrong. Only print the first violation.
-            val first: Violation = violations(0)
-            BadRequest("Preferences /" + preferenceSlug + "/" + id +
-                       " does not validate properly. " + first.path + " " + first.message)
         }
     }
 

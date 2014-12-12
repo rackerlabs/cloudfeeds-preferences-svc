@@ -232,6 +232,30 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
         }
     }
 
+    test("should get 400: POST of preferences with no metadata /nometadata/:id") {
+        val randomId = Random.nextInt()
+        info("Calling POST /nometadata/" + randomId)
+        post("/nometadata/" + randomId,
+            """
+              |{
+              |  "enabled": false,
+              |  "data_format" : [ "JSON", "BOGUS" ],
+              |  "default_container_name" : "FeedsArchives",
+              |  "archive_container_urls": {
+              |      "iad": "http://...",
+              |      "dfw": "http://...",
+              |      "ord": "http://...",
+              |      "lon": "http://...",
+              |      "hkg": "http://...",
+              |      "syd": "http://..."
+              |  }
+              |}
+            """.stripMargin, Map("Content-Type" -> "application/json")) {
+            status should equal (400)
+            body should include ("does not have any metadata")
+        }
+    }
+
     override def afterAll() {
         super.afterAll()
         deleteSchema(db)
