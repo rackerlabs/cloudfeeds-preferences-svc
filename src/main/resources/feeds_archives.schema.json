@@ -53,8 +53,8 @@
             "description":  "A list of archiving format that a user prefers to have. Values are: JSON, XML",
             "required":     true
         },
-        "default_archive_container_name": {
-            "id":           "#default_archive_container_name",
+        "default_container_name": {
+            "id":           "#default_container_name",
             "type":         "string",
             "description":  "The default container name. If no data center specific container URLs are set, then archives will be stored in this container that data center.",
             "default":      "FeedsArchives",
