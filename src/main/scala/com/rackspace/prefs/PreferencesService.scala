@@ -51,13 +51,11 @@ with JacksonJsonSupport {
     get("/metadata/:preference_type") {
         val preferenceType = params("preference_type")
         contentType = "application/schema+json"
-        db withDynSession {
-            val result = preferencesMetadata.filter(_.slug === preferenceType).run
-            if ( result.length == 1 ) {
-                result(0).schema
-            } else {
-                NotFound("Metadata preferences for " + preferenceType + " not found")
-            }
+        val schema = getSchema(preferenceType)
+        if ( schema != "" ) {
+            schema
+        } else {
+            NotFound("Metadata preferences for /" + preferenceType + " not found")
         }
     }
 
@@ -81,22 +79,42 @@ with JacksonJsonSupport {
         val id = params("id")
         val payload = request.body
 
+        val schema = getSchema(preferenceSlug)
+
+        val orderly = Orderly(schema)
         val violations = orderly.validate(payload)
         if ( violations.length == 0 ) {
             db withDynSession {
-                if (preferences.filter(_.id === id).run.isEmpty)
+                val result = preferences.filter(prefs => prefs.preferencesMetadataSlug === preferenceSlug && prefs.id === id).run
+                if (preferences.filter(prefs => prefs.preferencesMetadataSlug === preferenceSlug && prefs.id === id).run.isEmpty) {
                     preferences.map(p => (p.id, p.preferencesMetadataSlug, p.payload))
                                .insert(id, preferenceSlug, payload)
-                else
+                    Created("")
+                } else {
                     preferences
-                        .filter(r => r.preferencesMetadataSlug === preferenceSlug && r.id === id)
-                        .map(r => (r.payload, r.updated))
+                        .filter(prefs => prefs.preferencesMetadataSlug === preferenceSlug && prefs.id === id)
+                        .map(p => (p.payload, p.updated))
                         .update((payload, DateTime.now()))
+                    Ok()
+                }
             }
-
-            Created("")
         } else {
-            BadRequest("Preferences /${preferenceSlug}/${id} does not validate properly")
+            // give them hints of what's wrong. Only print the first violation.
+            val first: Violation = violations(0)
+            BadRequest("Preferences /" + preferenceSlug + "/" + id +
+                       " does not validate properly. " + first.path + " " + first.message)
         }
+    }
+
+    def getSchema(slug: String) : String = {
+
+        var schema: String = ""
+        db withDynSession {
+            val result = preferencesMetadata.filter(_.slug === slug).run
+            if ( result.length == 1 ) {
+                schema = result(0).schema
+            }
+        }
+        schema
     }
 }
