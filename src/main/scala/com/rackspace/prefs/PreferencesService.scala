@@ -59,6 +59,7 @@ with JacksonJsonSupport {
         db withDynSession {
             val result = preferences.filter( prefs => prefs.id === id && prefs.preferencesMetadataSlug === preferenceType).run
             if ( result.length == 1 ) {
+                contentType = formats("json")
                 result(0).payload
             } else {
                 NotFound("Preferences for " + preferenceType + " with id " + id + " not found")

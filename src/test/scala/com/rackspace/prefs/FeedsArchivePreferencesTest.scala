@@ -53,6 +53,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
         get("/archive_prefs/" + randomId) {
             status should equal (200)
             body should equal (prefs)
+            response.mediaType should equal (Some("application/json"))
         }
     }
 
