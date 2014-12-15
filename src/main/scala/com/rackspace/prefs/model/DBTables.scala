@@ -5,6 +5,8 @@ import java.sql.Timestamp
 import org.joda.time.DateTime
 
 import scala.slick.driver.JdbcDriver.simple._
+import scala.slick.direct.AnnotationMapper.column
+import scala.slick.lifted.TableQuery
 
 
 object DBTables {
@@ -33,8 +35,13 @@ object DBTables {
     def preferencesMetadataSlug = column[String]("PREFERENCES_METADATA_SLUG", O.DBType("VARCHAR"))
     def payload = column[String]("PAYLOAD", O.DBType("VARCHAR"))
 
-    def created = column[DateTime]("CREATED", O.NotNull)
-    def updated = column[DateTime]("UPDATED", O.NotNull)
+    // This is not an ideal way to set a default timestamp while creating DDL. Better way would be to do this.
+    // val now = SimpleFunction.nullary[Timestamp]("now")
+    // and adding O.Default(now) instead of O.DBType.
+    // To make this happen, we need to figure a way to make "now" of time "DateTime" instead of "TIMESTAMP"
+    // Either way, this is not database agnostic
+    def created = column[DateTime]("CREATED", O.NotNull, O.DBType("TIMESTAMP DEFAULT CURRENT_TIMESTAMP"))
+    def updated = column[DateTime]("UPDATED", O.NotNull, O.DBType("TIMESTAMP DEFAULT CURRENT_TIMESTAMP"))
 
     override def * = (id ,preferencesMetadataSlug, payload, created.?, updated.?) <>
       (Preferences.tupled, Preferences.unapply)
