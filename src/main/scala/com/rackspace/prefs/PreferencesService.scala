@@ -47,11 +47,9 @@ with JacksonJsonSupport {
     get("/metadata/:preference_type") {
         val preferenceType = params("preference_type")
         contentType = "application/schema+json"
-        val schema = getSchema(preferenceType)
-        if ( schema != "" ) {
-            schema
-        } else {
-            NotFound("Metadata preferences for /" + preferenceType + " not found")
+        getSchema(preferenceType) match {
+            case ""              => NotFound("Metadata preferences for /" + preferenceType + " not found")
+            case schema: String  => schema
         }
     }
 
