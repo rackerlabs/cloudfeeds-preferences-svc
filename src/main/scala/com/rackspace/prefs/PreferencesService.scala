@@ -23,8 +23,6 @@ with JacksonJsonSupport {
 
     protected implicit val jsonFormats: Formats = DefaultFormats
 
-    // hard code for now, eventually needs to load from DB
-    val objMapper = new ObjectMapper()
     val schemaObj = JsonLoader.fromResource("/feeds_archives.schema.json")
     val schemaFactory = JsonSchemaFactory.byDefault()
     val schema = schemaFactory.getJsonSchema(schemaObj)
