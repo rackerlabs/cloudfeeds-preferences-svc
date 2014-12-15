@@ -65,7 +65,7 @@
             "type":        "boolean",
             "description": "Indicates whether Cloud Feeds archiving is enabled for this cloud account",
             "default":     false,
-            "required":    false
+            "required":    true
         }
     }
 }
