@@ -29,16 +29,17 @@ class MetadataTest extends ScalatraSuite with FunSuiteLike with InitDbTrait {
         initMetaData(db, schema)
     }
 
-    test("should get 200: GET /") {
+    test("should get 404: GET /") {
         get("/") {
-            status should equal (200)
+            println(body)
+            status should equal (404)
         }
     }
 
-    test("should get 200: GET /metadata") {
+    test("should get 404: GET /metadata") {
         get("/metadata") {
             println(body)
-            status should equal (200)
+            status should equal (404)
         }
     }
 
