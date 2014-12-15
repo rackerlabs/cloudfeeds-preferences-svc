@@ -85,7 +85,6 @@ with JacksonJsonSupport {
                                " does not validate properly. " + first.path + " " + first.message)
                 } else {
                     db withDynSession {
-                        val result = preferences.filter(prefs => prefs.preferencesMetadataSlug === preferenceSlug && prefs.id === id).run
                         if (preferences.filter(prefs => prefs.preferencesMetadataSlug === preferenceSlug && prefs.id === id).run.isEmpty) {
                             preferences.map(p => (p.id, p.preferencesMetadataSlug, p.payload))
                                        .insert(id, preferenceSlug, payload)
