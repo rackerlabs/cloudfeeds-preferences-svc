@@ -24,18 +24,7 @@ with JacksonJsonSupport {
     protected implicit val jsonFormats: Formats = DefaultFormats
 
     get("/") {
-        <html><body>
-            Preferences Service!
-            {if (isDevelopmentMode) <h3>Dev Mode</h3>}
-        </body></html>
-    }
-
-    // TODO: what should we return here?
-    // Ideally it should present a list of links to fetch individual metadata.
-    // But what json format should it be?
-    get("/metadata") {
-        contentType = formats("json")
-        db withDynSession { preferencesMetadata.list.map(m => (m.slug, m.schema)) }
+        NotFound("Invalid URI: /")
     }
 
     get("/metadata/:preference_type") {
