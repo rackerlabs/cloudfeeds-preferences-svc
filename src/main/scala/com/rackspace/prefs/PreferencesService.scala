@@ -44,10 +44,10 @@ with JacksonJsonSupport {
 
     get("/metadata/:preference_type") {
         val preferenceType = params("preference_type")
-        contentType = "application/schema+json"
+        contentType = formats("json")
         getSchema(preferenceType) match {
-            case ""              => NotFound("Metadata preferences for /" + preferenceType + " not found")
-            case schema: String  => schema
+            case schema: Some[String] => schema.get
+            case None                 => NotFound("Metadata preferences for /" + preferenceType + " not found")
         }
     }
 
@@ -73,9 +73,8 @@ with JacksonJsonSupport {
         val payload = request.body
 
         getSchema(preferenceSlug) match {
-            case ""      => BadRequest("Preferences for /" + preferenceSlug + " does not have any metadata")
-            case schema  => {
-                val orderly = Orderly(schema)
+            case schema: Some[String] => {
+                val orderly = Orderly(schema.get)
                 val violations = orderly.validate(payload)
                 if ( violations.length > 0 ) {
                     // give them hints of what's wrong. Only print the first violation.
@@ -98,18 +97,17 @@ with JacksonJsonSupport {
                     }
                 }
             }
+            case None     => BadRequest("Preferences for /" + preferenceSlug + " does not have any metadata")
         }
     }
 
-    def getSchema(slug: String) : String = {
-
-        var schema: String = ""
+    def getSchema(slug: String) : Option[String] = {
         db withDynSession {
             val result = preferencesMetadata.filter(_.slug === slug).run
-            if ( result.length == 1 ) {
-                schema = result(0).schema
+            result.length match {
+                case 1 => Some(result(0).schema)
+                case _ => None
             }
         }
-        schema
     }
 }
