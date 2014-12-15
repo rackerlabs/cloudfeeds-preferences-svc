@@ -23,10 +23,6 @@ with JacksonJsonSupport {
 
     protected implicit val jsonFormats: Formats = DefaultFormats
 
-    val schemaObj = JsonLoader.fromResource("/feeds_archives.schema.json")
-    val schemaFactory = JsonSchemaFactory.byDefault()
-    val schema = schemaFactory.getJsonSchema(schemaObj)
-
     get("/") {
         <html><body>
             Preferences Service!
