@@ -38,7 +38,8 @@ class DBTablesIT extends FunSuite with BeforeAndAfterAll with InitDbTrait {
     clearData()
 
     db withDynSession {
-      preferencesMetadata += PreferencesMetadata(ArchivePrefsMetadataSlug, "Cloud feeds Archive Preferences", "{\"schema\": \"JSON schema\"}")
+      preferencesMetadata.map(metadata => (metadata.slug, metadata.description, metadata.schema))
+        .insert(ArchivePrefsMetadataSlug, "Cloud feeds Archive Preferences", "{\"schema\": \"JSON schema\"}")
     }
 
     val hasPreferenceMetadata = db withDynSession {
@@ -56,9 +57,11 @@ class DBTablesIT extends FunSuite with BeforeAndAfterAll with InitDbTrait {
     val currentTime = new DateTime()
 
     db withDynSession {
-      //current time and updated time should be inserted by database definition.
-      preferences += Preferences(tenantId, ArchivePrefsMetadataSlug, "{\"payload\": \"JSON blob\"}",
-        Option(currentTime), Option(currentTime))
+      val archivePrefsMetadataId =
+        preferencesMetadata.filter(_.slug === ArchivePrefsMetadataSlug).map(_.id).run.head
+
+        preferences.map(prefs => (prefs.id, prefs.preferencesMetadataId, prefs.payload))
+          .insert(tenantId, archivePrefsMetadataId, "{\"payload\": \"JSON blob\"}")
     }
 
     val hasTenantPreference = db withDynSession {
@@ -75,12 +78,16 @@ class DBTablesIT extends FunSuite with BeforeAndAfterAll with InitDbTrait {
     val tenantId = "tenant_1"
     val currentTime = new DateTime()
 
-    val archivePrefs = Preferences(tenantId, ArchivePrefsMetadataSlug, "{\"payload\": \"JSON blob\"}",
-      Option(currentTime), Option(currentTime))
     try {
       db withDynSession {
-        preferences += archivePrefs
-        preferences += archivePrefs
+        val archivePrefsMetadataId =
+          preferencesMetadata.filter(_.slug === ArchivePrefsMetadataSlug).map(_.id).run.head
+
+        preferences.map(prefs => (prefs.id, prefs.preferencesMetadataId, prefs.payload))
+          .insert(tenantId, archivePrefsMetadataId, "{\"payload\": \"JSON blob\"}")
+
+        preferences.map(prefs => (prefs.id, prefs.preferencesMetadataId, prefs.payload))
+          .insert(tenantId, archivePrefsMetadataId, "{\"payload\": \"JSON blob\"}")
       }
       fail()  //This will trigger failure if the above insert does not fail
     }

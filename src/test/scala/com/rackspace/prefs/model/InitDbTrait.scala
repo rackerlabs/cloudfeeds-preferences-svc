@@ -36,15 +36,19 @@ trait InitDbTrait {
 
     def initMetaData(db: Database, schema: String) {
         db withDynSession {
-            preferencesMetadata += PreferencesMetadata(ArchivePrefsMetadataSlug, "Cloud feeds Archive Preferences", schema)
+            preferencesMetadata.map(pm => (pm.slug, pm.description, pm.schema))
+              .insert(ArchivePrefsMetadataSlug, "Cloud feeds Archive Preferences", schema)
         }
     }
 
-    def createPreference(db: Database, id: String, preferenceType: String, payload: String) {
+    def createPreference(db: Database, id: String, preferenceSlug: String, payload: String) {
         val currentTime = new DateTime()
         db withDynSession {
+          val prefsMetadataId =
+            preferencesMetadata.filter(_.slug === preferenceSlug).map(_.id).run.head
+
             //current time and updated time should be inserted by database definition.
-            preferences += Preferences(id, preferenceType, payload,
+            preferences += Preferences(id, prefsMetadataId, payload,
                                         Option(currentTime), Option(currentTime))
         }
     }

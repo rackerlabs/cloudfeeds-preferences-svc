@@ -2,7 +2,7 @@
 <c3p0-config>
     <default-config>
         <property name="driverClass">org.h2.Driver</property>
-        <property name="jdbcUrl">jdbc:h2:~/preferencesdb:preferencesdb</property>
+        <property name="jdbcUrl">jdbc:h2:~/preferencesdb</property>
         <property name="user">root</property>
         <property name="password"></property>
         <property name="minPoolSize">1</property>
