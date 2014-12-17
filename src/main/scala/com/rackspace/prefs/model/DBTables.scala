@@ -20,10 +20,13 @@ object DBTables {
   class PreferencesMetadataTable(tag: Tag)
     extends Table[PreferencesMetadata](tag, "PREFERENCES_METADATA") {
 
+    // h2 specifc: Using O.AutoInc make this column(ID) implicitly primary key
+    // which it shouldnt be.
+    def id = column[Int]("ID", O.DBType("INTEGER AUTO_INCREMENT"))
     def slug = column[String]("SLUG", O.PrimaryKey, O.DBType("VARCHAR"))
     def description = column[String]("DESCRIPTION", O.DBType("VARCHAR"))
     def schema = column[String]("SCHEMA", O.DBType("VARCHAR"))
-    def * = (slug, description, schema) <>
+    def * = (id.?, slug, description, schema) <>
       (PreferencesMetadata.tupled, PreferencesMetadata.unapply)
   }
   val preferencesMetadata = TableQuery[PreferencesMetadataTable]
@@ -32,7 +35,7 @@ object DBTables {
     extends Table[Preferences](tag, "PREFERENCES") {
 
     def id = column[String]("ID", O.DBType("VARCHAR"))
-    def preferencesMetadataSlug = column[String]("PREFERENCES_METADATA_SLUG", O.DBType("VARCHAR"))
+    def preferencesMetadataId = column[Int]("PREFERENCES_METADATA_ID")
     def payload = column[String]("PAYLOAD", O.DBType("VARCHAR"))
 
     // This is not an ideal way to set a default timestamp while creating DDL. Better way would be to do this.
@@ -43,11 +46,11 @@ object DBTables {
     def created = column[DateTime]("CREATED", O.NotNull, O.DBType("TIMESTAMP DEFAULT CURRENT_TIMESTAMP"))
     def updated = column[DateTime]("UPDATED", O.NotNull, O.DBType("TIMESTAMP DEFAULT CURRENT_TIMESTAMP"))
 
-    override def * = (id ,preferencesMetadataSlug, payload, created.?, updated.?) <>
+    override def * = (id ,preferencesMetadataId, payload, created.?, updated.?) <>
       (Preferences.tupled, Preferences.unapply)
 
-    def pk = primaryKey("compound_pk", (id, preferencesMetadataSlug))
-    def slug = foreignKey("PREFERENCES_METADATA_SLUG_FK", preferencesMetadataSlug, preferencesMetadata)(_.slug)
+    def pk = primaryKey("compound_pk", (id, preferencesMetadataId))
+    def slugId = foreignKey("PREFERENCES_METADATA_SLUG_FK", preferencesMetadataId, preferencesMetadata)(_.id)
   }
 
   val preferences = TableQuery[PreferencesTable]
