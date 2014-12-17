@@ -1,0 +1,23 @@
+apply plugin: 'java'
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+    compile('org.flywaydb:flyway-commandline:3.1') {
+        transitive = false
+    }
+    compile 'org.flywaydb:flyway-core:3.1'
+    compile 'com.h2database:h2:1.4.182'
+}
+
+task buildZip(type: Zip) {
+
+    from sourceSets.main.output
+
+    into('lib') {
+        from configurations.runtime
+    }
+}
