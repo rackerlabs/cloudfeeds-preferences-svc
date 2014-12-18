@@ -1,4 +1,20 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+        maven { url 'https://oss.sonatype.org/content/groups/public' }
+    }
+    dependencies {
+        classpath 'com.bmuschko:gradle-nexus-plugin:2.1.1'
+        classpath 'com.github.townsfolk:gradle-release:1.2'
+    }
+}
+
 apply plugin: 'java'
+apply plugin: 'release'
+apply plugin: 'com.bmuschko.nexus'
+
+group = 'com.rackspace.prefs'
 
 repositories {
     mavenCentral()
@@ -21,3 +37,20 @@ task buildZip(type: Zip) {
         from configurations.runtime
     }
 }
+
+nexus {
+    sign = false
+    repositoryUrl = 'http://maven.research.rackspacecloud.com/content/repositories/releases/'
+    snapshotRepositoryUrl = 'http://maven.research.rackspacecloud.com/content/repositories/snapshots/'
+}
+
+release {
+    failOnPublishNeeded = false
+    failOnCommitNeeded = false
+    failOnUnversionedFiles = false
+    tagPrefix = 'cloudfeeds-preferences-svc-db'
+}
+
+// 'gradle release' will also upload release to Nexus
+uploadArchives.dependsOn   buildZip
+createReleaseTag.dependsOn uploadArchives
