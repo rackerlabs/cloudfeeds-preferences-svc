@@ -37,7 +37,7 @@ Command to run flyway script on a h2 test db.
 
 ```
 gradle clean buildZip 
-cd build/distributions/build/distributions/cloudfeeds-preferences-svc-db.zip  
+cd build/distributions/  
 unzip cloudfeeds-preferences-svc-db.zip
                                          
 sh flyway -user=root -url=jdbc:h2:/Users/chan5120/testdb migrate                                         
