@@ -47,8 +47,8 @@ repositories {
 
 ext.scala_version = '2.10.4'
 ext.scalatra_version = '2.3.0'
-//ext.jetty_version = '9.2.3.v20140905'
-ext.jetty_version = '8.1.10.v20130312'
+ext.jetty_version = '9.2.3.v20140905'
+//ext.jetty_version = '8.1.10.v20130312'
 
 dependencies {
     compile 'org.scala-lang:scala-compiler:' + scala_version
@@ -69,7 +69,7 @@ dependencies {
     compile 'com.github.fge:json-schema-validator:2.2.6'
     compile 'joda-time:joda-time:2.6'
     testCompile 'org.scalatest:scalatest_2.10:2.1.7'
-    testCompile 'org.scalatra:scalatra-scalatest_2.10:2.2.2'
+    testCompile 'org.scalatra:scalatra-scalatest_2.10:2.3.0'
 }
 
 

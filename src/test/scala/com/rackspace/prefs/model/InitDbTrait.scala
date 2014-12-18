@@ -49,6 +49,7 @@ trait InitDbTrait {
 
             //current time and updated time should be inserted by database definition.
             preferences += Preferences(id, prefsMetadataId, payload,
+                                        Some("alternate_id"),
                                         Option(currentTime), Option(currentTime))
         }
     }

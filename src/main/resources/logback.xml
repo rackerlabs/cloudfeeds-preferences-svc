@@ -24,10 +24,9 @@
         </rollingPolicy>
     </appender>
 
-    <root level="INFO">
+    <root level="DEBUG">
         <appender-ref ref="defaultFile" />
-        <!-- Uncomment this if you want to debug anything during development
+        <!-- Uncomment this if you want to debug anything during development -->
         <appender-ref ref="STDOUT" />
-        -->
     </root>
 </configuration>
