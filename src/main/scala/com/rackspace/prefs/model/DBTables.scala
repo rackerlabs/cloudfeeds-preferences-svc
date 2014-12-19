@@ -38,6 +38,8 @@ object DBTables {
     def preferencesMetadataId = column[Int]("PREFERENCES_METADATA_ID")
     def payload = column[String]("PAYLOAD", O.DBType("VARCHAR"))
 
+    def alternateId = column[Option[String]]("ALTERNATE_ID", O.Nullable, O.DBType("VARCHAR"))
+
     // This is not an ideal way to set a default timestamp while creating DDL. Better way would be to do this.
     // val now = SimpleFunction.nullary[Timestamp]("now")
     // and adding O.Default(now) instead of O.DBType.
@@ -46,7 +48,7 @@ object DBTables {
     def created = column[DateTime]("CREATED", O.NotNull, O.DBType("TIMESTAMP DEFAULT CURRENT_TIMESTAMP"))
     def updated = column[DateTime]("UPDATED", O.NotNull, O.DBType("TIMESTAMP DEFAULT CURRENT_TIMESTAMP"))
 
-    override def * = (id ,preferencesMetadataId, payload, created.?, updated.?) <>
+    override def * = (id, preferencesMetadataId, payload, alternateId, created.?, updated.?) <>
       (Preferences.tupled, Preferences.unapply)
 
     def pk = primaryKey("compound_pk", (id, preferencesMetadataId))
