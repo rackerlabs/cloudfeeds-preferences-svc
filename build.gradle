@@ -165,8 +165,8 @@ ospackage {
     }
 
     // check to see which jar got built for our symlink so the init script works
-    def version_jar = app_name + '-' + version_clean + '.jar'
-    def snapshot_jar = app_name + '-' + version_snapshot + '.jar'
+    def version_jar = package_name + '-' + version_clean + '.jar'
+    def snapshot_jar = package_name + '-' + version_snapshot + '.jar'
     def built_jar
     if (file('build/libs/' + version_jar).exists()) {
         built_jar = version_jar
