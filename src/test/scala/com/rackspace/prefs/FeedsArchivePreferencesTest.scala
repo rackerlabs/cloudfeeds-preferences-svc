@@ -20,12 +20,9 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
     val db = Database.forDataSource(new ComboPooledDataSource)
     addServlet(new PreferencesService(db), "/*")
 
-    val schema = Source.fromInputStream(getClass().getResourceAsStream("/feeds_archives.schema.orderly")).getLines().mkString
-
     override def beforeAll {
         super.beforeAll
-        createSchema(db)
-        initMetaData(db, schema)
+        clearData(db)
     }
 
     test("should get 200: GET /archive_prefs/:id") {
@@ -274,6 +271,6 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
 
     override def afterAll() {
         super.afterAll()
-        deleteSchema(db)
+        clearData(db)
     }
 }

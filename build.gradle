@@ -1,3 +1,5 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
 buildscript {
     repositories {
         mavenCentral()
@@ -8,6 +10,7 @@ buildscript {
         classpath 'com.bmuschko:gradle-nexus-plugin:2.1.1'
         classpath 'com.github.townsfolk:gradle-release:1.2'
         classpath 'com.netflix.nebula:gradle-ospackage-plugin:2.0.3'
+        classpath "org.flywaydb:flyway-gradle-plugin:3.1"
     }
 }
 
@@ -16,6 +19,7 @@ apply plugin: 'application'
 apply plugin: 'com.bmuschko.nexus'
 apply plugin: 'release'
 apply plugin: 'os-package-base'
+apply plugin: 'flyway'
 
 defaultTasks  'clean', 'build'
 
@@ -41,6 +45,7 @@ def app_user = 'prefssvc'
 def app_group = 'prefssvc'
 
 repositories {
+    mavenLocal()
     mavenCentral()
     jcenter()
 }
@@ -68,6 +73,11 @@ dependencies {
     compile 'com.nparry:orderly_2.10:1.0.6'
     compile 'com.github.fge:json-schema-validator:2.2.6'
     compile 'joda-time:joda-time:2.6'
+    compile('org.flywaydb:flyway-commandline:3.1') {
+        transitive = false
+    }
+    compile 'org.flywaydb:flyway-core:3.1'
+    compile 'com.rackspace.prefs:cloudfeeds-preferences-svc-db:1.0.0-SNAPSHOT'
     testCompile 'org.scalatest:scalatest_2.10:2.1.7'
     testCompile 'org.scalatra:scalatra-scalatest_2.10:2.3.0'
 }
@@ -210,3 +220,25 @@ release {
 uploadArchives.dependsOn   uberjar
 createReleaseTag.dependsOn uploadArchives
 
+flyway {
+    url  = "jdbc:h2:file:${buildDir}/db/test/preferencesdb;MODE=PostgreSQL;IGNORECASE=TRUE"
+    user = 'root'
+    locations = [
+            'classpath:sql'
+    ]
+}
+
+//processTestResources {
+//    filter(ReplaceTokens, tokens: [buildDir: buildDir.getAbsolutePath()])
+//}
+
+// Gradle plugin has dependency on testClasses which creates circular dependency if
+// we were to have flyway tasks dependsOn testClasses. This is a small workaround/hack.
+// https://github.com/flyway/flyway/issues/775
+project.afterEvaluate {
+    flywayClean.dependsOn -= testClasses
+    flywayMigrate.dependsOn = [processResources, processTestResources]
+}
+
+testClasses.dependsOn flywayClean
+testClasses.dependsOn flywayMigrate
