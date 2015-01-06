@@ -13,6 +13,7 @@ buildscript {
 apply plugin: 'java'
 apply plugin: 'release'
 apply plugin: 'com.bmuschko.nexus'
+apply plugin: 'maven'
 
 group = 'com.rackspace.prefs'
 
@@ -49,6 +50,14 @@ release {
     failOnCommitNeeded = false
     failOnUnversionedFiles = false
     tagPrefix = 'cloudfeeds-preferences-svc-db'
+}
+
+artifacts {
+    archives(buildZip) {
+        name 'cloudfeeds-preferences-svc-db'
+        type 'zip'
+        builtBy buildZip
+    }
 }
 
 // 'gradle release' will also upload release to Nexus
