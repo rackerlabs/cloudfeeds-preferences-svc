@@ -21,14 +21,6 @@ To build this component, we require:
 gradle clean buildZip
 ```
 
-### Build a Jar
-```
-gradle clean build jar
-```
-
-
-Note: The current c3p0-config.xml file in classpath expects this file in home directory. You can change ```jdbcUrl``` property to point to the location of your database.
-
 ## How to run the App
 Run the build to generate zip file. 
 Unzip the zip file(```build/distributions/cloudfeeds-preferences-svc-db.zip```) to a local folder.
