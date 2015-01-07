@@ -68,6 +68,7 @@ dependencies {
     compile 'com.nparry:orderly_2.10:1.0.6'
     compile 'com.github.fge:json-schema-validator:2.2.6'
     compile 'joda-time:joda-time:2.6'
+    compile 'org.postgresql:postgresql:9.3-1102-jdbc41'
     testCompile 'org.scalatest:scalatest_2.10:2.1.7'
     testCompile 'org.scalatra:scalatra-scalatest_2.10:2.3.0'
 }
