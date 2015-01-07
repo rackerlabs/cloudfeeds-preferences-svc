@@ -12,7 +12,7 @@ with other sql complaint databases also)
 
 ## *IMPORTANT*
 Any time you create a new table, you must have a grant to allow the app access
-and properly set ownership of the new tables.  See V1.2.1_grants.sql as an
+and properly set ownership of the new tables.  See V1.2.1__grants.sql as an
 example file that can be used for the grants and ownership change.
 
 ## How to Build
