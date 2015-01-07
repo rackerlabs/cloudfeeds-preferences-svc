@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory
 import scala.slick.driver.JdbcDriver.simple._
 import scala.slick.jdbc.JdbcBackend.Database
 import scala.slick.jdbc.JdbcBackend.Database.dynamicSession
-import scala.slick.jdbc.meta.MTable
 
 
 class DBTablesIT extends FunSuite with BeforeAndAfterAll with InitDbTrait {
@@ -19,39 +18,8 @@ class DBTablesIT extends FunSuite with BeforeAndAfterAll with InitDbTrait {
   val pooledDataSource = new ComboPooledDataSource
   val db : Database = Database.forDataSource(pooledDataSource)
 
-  override def beforeAll {
-    createSchema(db)
-  }
-
-  test ("Verify if tables got created") {
-
-    val tables = db withDynSession {
-      MTable.getTables.list
-    }
-
-    assert(tables.size == 2)
-    assert(tables.count(_.name.name.equalsIgnoreCase("PREFERENCES")) == 1, "PREFERENCES table is not created")
-    assert(tables.count(_.name.name.equalsIgnoreCase("PREFERENCES_METADATA")) == 1, "PREFERENCES_METADATA table is not created")
-  }
-
-  test ("Verify insertion of data into PREFERENCES_METADATA table") {
-    clearData()
-
-    db withDynSession {
-      preferencesMetadata.map(metadata => (metadata.slug, metadata.description, metadata.schema))
-        .insert(ArchivePrefsMetadataSlug, "Cloud feeds Archive Preferences", "{\"schema\": \"JSON schema\"}")
-    }
-
-    val hasPreferenceMetadata = db withDynSession {
-      preferencesMetadata.filter(_.slug === ArchivePrefsMetadataSlug).run.nonEmpty
-    }
-
-    assert(hasPreferenceMetadata, "row not inserted in PREFERENCES_METADATA table")
-  }
-
-  test ("Verify insertion of data into table PREFERENCES") {
-    clearData()
-    initMetaData(db)
+  test ("Verify insertion of data into table preferences") {
+    clearData(db)
 
     val tenantId = "tenant_1"
     val currentTime = new DateTime()
@@ -68,12 +36,11 @@ class DBTablesIT extends FunSuite with BeforeAndAfterAll with InitDbTrait {
       preferences.filter(_.id === tenantId).run.nonEmpty
     }
 
-    assert(hasTenantPreference, "row not inserted in table PREFERENCES")
+    assert(hasTenantPreference, "row not inserted in table preferences")
   }
 
   test ("Verify only unique combinations of tenantId/preferenceMetadata can be inserted into PREFERENCES table") {
-    clearData()
-    initMetaData(db)
+    clearData(db)
 
     val tenantId = "tenant_1"
     val currentTime = new DateTime()
@@ -96,14 +63,8 @@ class DBTablesIT extends FunSuite with BeforeAndAfterAll with InitDbTrait {
     }
   }
 
-  def clearData() {
-    db withDynSession {
-      preferences.delete
-      preferencesMetadata.delete
-    }
-  }
-
   override def afterAll {
+    clearData(db)
     pooledDataSource.close
   }
 }

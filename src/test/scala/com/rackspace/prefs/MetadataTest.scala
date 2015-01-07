@@ -25,8 +25,7 @@ class MetadataTest extends ScalatraSuite with FunSuiteLike with InitDbTrait {
 
     override def beforeAll {
         super.beforeAll
-        createSchema(db)
-        initMetaData(db, schema)
+        clearData(db)
     }
 
     test("should get 404: GET /") {
@@ -60,7 +59,7 @@ class MetadataTest extends ScalatraSuite with FunSuiteLike with InitDbTrait {
 
     override def afterAll() {
         super.afterAll()
-        deleteSchema(db)
+        clearData(db)
     }
 
 }

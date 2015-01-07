@@ -27,8 +27,7 @@ class TenantIdAsAlternateIdTest extends ScalatraSuite with FunSuiteLike with Ini
 
     override def beforeAll {
         super.beforeAll
-        createSchema(db)
-        initMetaData(db, schema)
+        clearData(db)
     }
 
     test("should get 201: POST /archive_prefs/:id with multiple x-tenant-id") {
@@ -66,6 +65,6 @@ class TenantIdAsAlternateIdTest extends ScalatraSuite with FunSuiteLike with Ini
 
     override def afterAll() {
         super.afterAll()
-        deleteSchema(db)
+        clearData(db)
     }
 }
