@@ -78,6 +78,7 @@ dependencies {
     }
     compile 'org.flywaydb:flyway-core:3.1'
     compile 'com.rackspace.prefs:cloudfeeds-preferences-svc-db:1.0.0-SNAPSHOT'
+    compile 'org.postgresql:postgresql:9.3-1102-jdbc41'
     testCompile 'org.scalatest:scalatest_2.10:2.1.7'
     testCompile 'org.scalatra:scalatra-scalatest_2.10:2.3.0'
 }
@@ -175,8 +176,8 @@ ospackage {
     }
 
     // check to see which jar got built for our symlink so the init script works
-    def version_jar = app_name + '-' + version_clean + '.jar'
-    def snapshot_jar = app_name + '-' + version_snapshot + '.jar'
+    def version_jar = package_name + '-' + version_clean + '.jar'
+    def snapshot_jar = package_name + '-' + version_snapshot + '.jar'
     def built_jar
     if (file('build/libs/' + version_jar).exists()) {
         built_jar = version_jar
