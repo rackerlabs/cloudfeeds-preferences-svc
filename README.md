@@ -12,8 +12,11 @@ with other sql complaint databases also)
 
 ## *IMPORTANT*
 Any time you create a new table, you must have a grant to allow the app access
-and properly set ownership of the new tables.  See V1.2.1__grants.sql as an
-example file that can be used for the grants and ownership change.
+and properly set ownership of the new tables.  See sql/grants/V1.2.1__grants.sql as an
+example file that can be used for the grants and ownership change.  NOTE: H2
+does not support the postgresql grant syntax so you must not us the sql/grants/
+folder in your locations when running flyway. See the Local H2 example below on
+how to not pull in the grants folder when running flyway.
 
 ## How to Build
 To build this component, we require:
@@ -37,7 +40,7 @@ gradle clean buildZip
 cd build/distributions/
 unzip cloudfeeds-preferences-svc-db.zip
 
-sh flyway -user=root -url=jdbc:h2:/Users/chan5120/testdb migrate
+sh flyway -user=root -url=jdbc:h2:/Users/chan5120/testdb -locations:filesystem:./sql/schema migrate
 ```
 
 ### Remote PostgreSQL example
