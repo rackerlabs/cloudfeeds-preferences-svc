@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory
 
 import scala.slick.driver.JdbcDriver.simple._
 import scala.slick.jdbc.JdbcBackend.Database
-import scala.slick.jdbc.JdbcBackend.Database.dynamicSession
 
 
 class DBTablesIT extends FunSuite with BeforeAndAfterAll with InitDbTrait {
@@ -24,7 +23,7 @@ class DBTablesIT extends FunSuite with BeforeAndAfterAll with InitDbTrait {
     val tenantId = "tenant_1"
     val currentTime = new DateTime()
 
-    db withDynSession {
+    db.withSession { implicit session =>
       val archivePrefsMetadataId =
         preferencesMetadata.filter(_.slug === ArchivePrefsMetadataSlug).map(_.id).run.head
 
@@ -32,7 +31,7 @@ class DBTablesIT extends FunSuite with BeforeAndAfterAll with InitDbTrait {
           .insert(tenantId, archivePrefsMetadataId, "{\"payload\": \"JSON blob\"}")
     }
 
-    val hasTenantPreference = db withDynSession {
+    val hasTenantPreference = db.withSession { implicit session =>
       preferences.filter(_.id === tenantId).run.nonEmpty
     }
 
@@ -46,7 +45,7 @@ class DBTablesIT extends FunSuite with BeforeAndAfterAll with InitDbTrait {
     val currentTime = new DateTime()
 
     try {
-      db withDynSession {
+      db.withSession { implicit session =>
         val archivePrefsMetadataId =
           preferencesMetadata.filter(_.slug === ArchivePrefsMetadataSlug).map(_.id).run.head
 
