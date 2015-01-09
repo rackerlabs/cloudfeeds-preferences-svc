@@ -24,9 +24,15 @@
         </rollingPolicy>
     </appender>
 
+    <!--c3p0 logging-->
+    <logger name="com.mchange" level="INFO" /> 
+    
+    <!--jetting logging-->
+    <logger name="org.eclipse.jetty" level="INFO" />
+    
     <root level="INFO">
         <appender-ref ref="defaultFile" />
-        <!-- Uncomment this if you want to debug anything during development 
+        <!-- Uncomment this if you want to debug anything during development
         <appender-ref ref="STDOUT" />
         -->
     </root>

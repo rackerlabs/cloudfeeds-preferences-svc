@@ -8,5 +8,9 @@
         <property name="minPoolSize">1</property>
         <property name="maxPoolSize">50</property>
         <property name="acquireIncrement">1</property>
+        <property name="testConnectionOnCheckout">true</property>
+        <property name="connectionTesterClassName">com.mchange.v2.c3p0.impl.DefaultConnectionTester</property>
+        <property name="preferredTestQuery">SELECT 1</property>
+        <property name="idleConnectionTestPeriod">120</property>
     </default-config>
 </c3p0-config>
