@@ -18,15 +18,15 @@
             </resource>
         </resource>
 
-        <!-- resource to fetch archive_prefs -->
-        <resource id="archive_prefs" path="archive_prefs">
-            <resource id="get_archive_prefs_for_account" path="{accountId}" rax:roles="admin identity:user-admin cloudfeeds:observer cloudfeeds:service-admin">
+        <!-- resource to fetch archive -->
+        <resource id="archive" path="archive">
+            <resource id="get_archive_for_account" path="{accountId}" rax:roles="admin identity:user-admin cloudfeeds:observer cloudfeeds:service-admin">
                 <param name="accountId" type="xs:string" style="template">
                     <doc>This parameter specifies the cloud account ID for which the Cloud Feeds Archiving preferences is to be fetched</doc>
                 </param>
                 <method name="GET"/>
             </resource>
-            <resource id="set_archive_prefs_for_account" path="{accountId}" rax:roles="admin identity:user-admin cloudfeeds:service-admin">
+            <resource id="set_archive_for_account" path="{accountId}" rax:roles="admin identity:user-admin cloudfeeds:service-admin">
                 <param name="accountId" type="xs:string" style="template">
                     <doc>This parameter specifies the cloud account ID for which the Cloud Feeds Archiving preferences is to be fetched</doc>
                 </param>
