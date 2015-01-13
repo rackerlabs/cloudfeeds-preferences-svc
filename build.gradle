@@ -125,8 +125,8 @@ extraArchive {
 
 nexus {
     sign = false
-    repositoryUrl = 'http://maven.research.rackspacecloud.com/content/repositories/releases/'
-    snapshotRepositoryUrl = 'http://maven.research.rackspacecloud.com/content/repositories/snapshots/'
+    repositoryUrl = 'https://maven.research.rackspacecloud.com/content/repositories/releases/'
+    snapshotRepositoryUrl = 'https://maven.research.rackspacecloud.com/content/repositories/snapshots/'
 }
 
 // defaults for rpm/deb packaging

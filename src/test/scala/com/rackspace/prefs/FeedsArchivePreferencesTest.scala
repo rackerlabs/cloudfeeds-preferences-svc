@@ -1,5 +1,6 @@
 package com.rackspace.prefs
 
+import com.rackspace.prefs.model.DBTables._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatra.test.scalatest.ScalatraSuite
@@ -25,7 +26,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
         clearData(db)
     }
 
-    test("should get 200: GET /archive_prefs/:id") {
+    test("should get 200: GET /archive/:id") {
         // declaring this randomId outside test() as a var
         // doesn't work with subsequent tests :-(
         val randomId = Random.nextInt()
@@ -77,7 +78,6 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |{
               |  "enabled": true,
               |  "data_format" : [ "JSON", "XML" ],
-              |  "default_container_name" : "FeedsArchives",
               |  "archive_container_urls": {
               |      "iad": "http://...",
               |      "dfw": "http://...",
