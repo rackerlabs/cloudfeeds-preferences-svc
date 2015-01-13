@@ -46,8 +46,8 @@ def app_group = 'prefssvc'
 
 repositories {
     mavenLocal()
-    maven{ url "http://maven.research.rackspacecloud.com/content/repositories/snapshots/"}
-    maven{ url "http://maven.research.rackspacecloud.com/content/repositories/releases/"}
+    maven{ url "https://maven.research.rackspacecloud.com/content/repositories/snapshots/"}
+    maven{ url "https://maven.research.rackspacecloud.com/content/repositories/releases/"}
     mavenCentral()
     jcenter()
 }
@@ -125,8 +125,8 @@ extraArchive {
 
 nexus {
     sign = false
-    repositoryUrl = 'http://maven.research.rackspacecloud.com/content/repositories/releases/'
-    snapshotRepositoryUrl = 'http://maven.research.rackspacecloud.com/content/repositories/snapshots/'
+    repositoryUrl = 'https://maven.research.rackspacecloud.com/content/repositories/releases/'
+    snapshotRepositoryUrl = 'https://maven.research.rackspacecloud.com/content/repositories/snapshots/'
 }
 
 // defaults for rpm/deb packaging
