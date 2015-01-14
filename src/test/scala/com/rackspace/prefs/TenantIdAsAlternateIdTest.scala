@@ -30,9 +30,9 @@ class TenantIdAsAlternateIdTest extends ScalatraSuite with FunSuiteLike with Ini
         clearData(db)
     }
 
-    test("should get 201: POST /archive_prefs/:id with multiple x-tenant-id") {
+    test("should get 201: POST /archive/:id with multiple x-tenant-id") {
         val randomId = Random.nextInt()
-        info("Calling POST /archive_prefs/" + randomId)
+        info("Calling POST /archive/" + randomId)
         val prefs =
             """
               |{
@@ -49,7 +49,7 @@ class TenantIdAsAlternateIdTest extends ScalatraSuite with FunSuiteLike with Ini
               |  }
               |}
             """.stripMargin
-        post("/archive_prefs/" + randomId, prefs,
+        post("/archive/" + randomId, prefs,
              // change the Map() below to Seq() after this PR is accepted:
              //    https://github.com/scalatra/scalatra/pull/449
              Map("Content-Type" -> "application/json",

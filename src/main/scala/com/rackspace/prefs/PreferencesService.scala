@@ -131,4 +131,11 @@ with JacksonJsonSupport {
     def jsonify(errorMessage: String) : String = {
         "{ \"error\": \"" + errorMessage + "\" }"
     }
+  
+    error {
+      case e => {
+        logger.error("Request failed with exception", e);
+        InternalServerError(jsonify("Request failed with exception:" + e + " message:" + e.getMessage))
+      }
+    }
 }

@@ -8,7 +8,7 @@ import org.joda.time.DateTime
 
 trait InitDbTrait {
 
-    val ArchivePrefsMetadataSlug = "archive_prefs"
+    val ArchivePrefsMetadataSlug = "archive"
 
     def createPreference(db: Database, id: String, preferenceSlug: String, payload: String) {
         val currentTime = new DateTime()
