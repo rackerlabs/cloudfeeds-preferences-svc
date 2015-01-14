@@ -1,7 +1,7 @@
 insert
   into "preferences_metadata" ("slug", "description", "schema")
 values ('archive',
-        'Cloud feeds Archive Preferences',
+        'Cloud Feeds Archive Preferences',
         'object {
             boolean enabled;
             array [
