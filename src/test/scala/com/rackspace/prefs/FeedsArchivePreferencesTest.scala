@@ -34,7 +34,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
                       |{
                       |  "enabled": true,
                       |  "data_format" : [ "JSON", "XML" ],
-                      |  "default_container_name" : "FeedsArchives",
+                      |  "default_archive_container_url" : "https://storage.stg.swift.racklabs.com/v1/StagingUS_6b881249-b992-44ef-9ad1-2b9f5107d2f9/FeedsArchives",
                       |  "archive_container_urls": {
                       |      "iad": "http://...",
                       |      "dfw": "http://...",
@@ -104,7 +104,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |{
               |  "enabled": true,
               |  "data_format" : [ "JSON" ],
-              |  "default_container_name" : "FeedsArchives",
+              |  "default_archive_container_url" : "https://storage.stg.swift.racklabs.com/v1/StagingUS_6b881249-b992-44ef-9ad1-2b9f5107d2f9/FeedsArchives",
               |  "archive_container_urls": {
               |      "iad": "http://...",
               |      "dfw": "http://...",
@@ -118,6 +118,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
         post("/archive/" + randomId, prefs, Map("Content-Type" -> "application/json")) {
             if ( status != 201 ) {
                 info(body)
+                println(body)
             }
             status should equal (201)
         }
@@ -131,7 +132,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |{
               |  "enabled": false,
               |  "data_format" : [ "JSON", "XML" ],
-              |  "default_container_name" : "FeedsArchives",
+              |  "default_archive_container_url" : "https://storage.stg.swift.racklabs.com/v1/StagingUS_6b881249-b992-44ef-9ad1-2b9f5107d2f9/FeedsArchives",
               |  "archive_container_urls": {
               |      "iad": "http://...",
               |      "dfw": "http://...",
@@ -155,7 +156,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |{
               |  "enabled": true,
               |  "data_format" : [ "JSON", "XML" ],
-              |  "default_container_name" : "FeedsArchives",
+              |  "default_archive_container_url" : "https://storage.stg.swift.racklabs.com/v1/StagingUS_6b881249-b992-44ef-9ad1-2b9f5107d2f9/FeedsArchives",
               |  "archive_container_urls": {
               |      "iad": "http://...",
               |      "dfw": "http://...",
@@ -180,7 +181,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
             """
               |{
               |  "data_format" : [ "JSON", "XML" ],
-              |  "default_container_name" : "FeedsArchives",
+              |  "default_archive_container_url" : "https://storage.stg.swift.racklabs.com/v1/StagingUS_6b881249-b992-44ef-9ad1-2b9f5107d2f9/FeedsArchives",
               |  "archive_container_urls": {
               |      "iad": "http://...",
               |      "dfw": "http://...",
@@ -205,7 +206,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |  "enabled" : false,
               |  "some_unknown_field": "asdfas",
               |  "data_format" : [ "JSON", "XML" ],
-              |  "default_container_name" : "FeedsArchives",
+              |  "default_archive_container_url" : "https://storage.stg.swift.racklabs.com/v1/StagingUS_6b881249-b992-44ef-9ad1-2b9f5107d2f9/FeedsArchives",
               |  "archive_container_urls": {
               |      "iad": "http://...",
               |      "dfw": "http://...",
@@ -229,7 +230,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |{
               |  "enabled": false,
               |  "data_format" : [ "JSON", "BOGUS" ],
-              |  "default_container_name" : "FeedsArchives",
+              |  "default_archive_container_url" : "https://storage.stg.swift.racklabs.com/v1/StagingUS_6b881249-b992-44ef-9ad1-2b9f5107d2f9/FeedsArchives",
               |  "archive_container_urls": {
               |      "iad": "http://...",
               |      "dfw": "http://...",
@@ -253,7 +254,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |{
               |  "enabled": false,
               |  "data_format" : [ "JSON", "BOGUS" ],
-              |  "default_container_name" : "FeedsArchives",
+              |  "default_archive_container_url" : "https://storage.stg.swift.racklabs.com/v1/StagingUS_6b881249-b992-44ef-9ad1-2b9f5107d2f9/FeedsArchives",
               |  "archive_container_urls": {
               |      "iad": "http://...",
               |      "dfw": "http://...",
