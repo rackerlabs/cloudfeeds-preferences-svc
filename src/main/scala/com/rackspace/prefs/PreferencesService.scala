@@ -12,7 +12,6 @@ import org.scalatra.scalate.ScalateSupport
 import collection.JavaConverters._
 import scala.slick.driver.JdbcDriver.simple._
 import scala.slick.jdbc.JdbcBackend.Database
-import scala.slick.jdbc.JdbcBackend.Database.dynamicSession
 import javax.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
 
@@ -46,7 +45,7 @@ with JacksonJsonSupport {
         val id = uriParts(1)
         contentType = formats("json")
 
-        db withDynSession {
+        db.withSession { implicit session =>
 
             val getPayloadQuery = for {
                 (prefs, metadata) <- preferences innerJoin preferencesMetadata on (_.preferencesMetadataId === _.id)
@@ -78,7 +77,7 @@ with JacksonJsonSupport {
 
                     case Nil => {
 
-                        db withDynSession {
+                        db.withSession { implicit session =>
                             val prefsForIdandSlug = preferences.filter(prefs => prefs.id === id && prefs.preferencesMetadataId === metadata.id)
 
                             prefsForIdandSlug.list match {
@@ -109,7 +108,7 @@ with JacksonJsonSupport {
     }
 
     def getMetadata(slug: String): Option[PreferencesMetadata] = {
-        db withDynSession {
+        db.withSession { implicit session =>
             preferencesMetadata.filter(_.slug === slug).list match {
                 case List(metadata: PreferencesMetadata) => Some(metadata)
                 case _ => None
@@ -131,5 +130,12 @@ with JacksonJsonSupport {
 
     def jsonify(errorMessage: String) : String = {
         "{ \"error\": \"" + errorMessage + "\" }"
+    }
+  
+    error {
+      case e => {
+        logger.error("Request failed with exception", e);
+        InternalServerError(jsonify("Request failed with exception:" + e + " message:" + e.getMessage))
+      }
     }
 }

@@ -1,5 +1,6 @@
 package com.rackspace.prefs
 
+import com.rackspace.prefs.model.DBTables._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatra.test.scalatest.ScalatraSuite
@@ -25,7 +26,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
         clearData(db)
     }
 
-    test("should get 200: GET /archive_prefs/:id") {
+    test("should get 200: GET /archive/:id") {
         // declaring this randomId outside test() as a var
         // doesn't work with subsequent tests :-(
         val randomId = Random.nextInt()
@@ -44,10 +45,10 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
                       |  }
                       |}
                     """.stripMargin
-        createPreference(db, randomId.toString(), "archive_prefs", prefs)
+        createPreference(db, randomId.toString(), "archive", prefs)
 
-        info("Calling GET /archive_prefs/" + randomId)
-        get("/archive_prefs/" + randomId) {
+        info("Calling GET /archive/" + randomId)
+        get("/archive/" + randomId) {
             status should equal (200)
             body should equal (prefs)
             response.mediaType should equal (Some("application/json"))
@@ -62,22 +63,21 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
         }
     }
 
-    test("should get 404: GET on preferences without id /archive_prefs") {
-        info("Calling GET /archive_prefs")
-        get("/archive_prefs") {
+    test("should get 404: GET on preferences without id /archive") {
+        info("Calling GET /archive")
+        get("/archive") {
             status should equal (404)
         }
     }
 
-    test("should get 201: POST of a new good preferences to /archive_prefs/:id") {
+    test("should get 201: POST of a new good preferences to /archive/:id") {
         val randomId = Random.nextInt()
-        info("Calling POST /archive_prefs/" + randomId)
+        info("Calling POST /archive/" + randomId)
         val prefs =
             """
               |{
               |  "enabled": true,
               |  "data_format" : [ "JSON", "XML" ],
-              |  "default_container_name" : "FeedsArchives",
               |  "archive_container_urls": {
               |      "iad": "http://...",
               |      "dfw": "http://...",
@@ -88,7 +88,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |  }
               |}
             """.stripMargin
-        post("/archive_prefs/" + randomId, prefs, Map("Content-Type" -> "application/json")) {
+        post("/archive/" + randomId, prefs, Map("Content-Type" -> "application/json")) {
             if ( status != 201 ) {
                 info(body)
             }
@@ -96,9 +96,9 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
         }
     }
 
-    test("should get 201: POST of a new preferences with only one data_format to /archive_prefs/:id") {
+    test("should get 201: POST of a new preferences with only one data_format to /archive/:id") {
         val randomId = Random.nextInt()
-        info("Calling POST /archive_prefs/" + randomId)
+        info("Calling POST /archive/" + randomId)
         val prefs =
             """
               |{
@@ -115,7 +115,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |  }
               |}
             """.stripMargin
-        post("/archive_prefs/" + randomId, prefs, Map("Content-Type" -> "application/json")) {
+        post("/archive/" + randomId, prefs, Map("Content-Type" -> "application/json")) {
             if ( status != 201 ) {
                 info(body)
             }
@@ -123,9 +123,9 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
         }
     }
 
-    test("should get 200: POST of a good preferences to existing /archive_prefs/:id") {
+    test("should get 200: POST of a good preferences to existing /archive/:id") {
         val randomId = Random.nextInt()
-        info("Calling 1st POST /archive_prefs/" + randomId)
+        info("Calling 1st POST /archive/" + randomId)
         val prefs =
             """
               |{
@@ -142,15 +142,15 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |  }
               |}
             """.stripMargin
-        post("/archive_prefs/" + randomId, prefs, Map("Content-Type" -> "application/json")) {
+        post("/archive/" + randomId, prefs, Map("Content-Type" -> "application/json")) {
             if ( status != 201 ) {
                 info(body)
             }
             status should equal (201)
         }
 
-        info("Calling 2nd POST /archive_prefs/" + randomId)
-        post("/archive_prefs/" + randomId,
+        info("Calling 2nd POST /archive/" + randomId)
+        post("/archive/" + randomId,
             """
               |{
               |  "enabled": true,
@@ -173,10 +173,10 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
         }
     }
 
-    test("should get 400: POST of preferences with missing required field to /archive_prefs/:id") {
+    test("should get 400: POST of preferences with missing required field to /archive/:id") {
         val randomId = Random.nextInt()
-        info("Calling POST /archive_prefs/" + randomId)
-        post("/archive_prefs/" + randomId,
+        info("Calling POST /archive/" + randomId)
+        post("/archive/" + randomId,
             """
               |{
               |  "data_format" : [ "JSON", "XML" ],
@@ -196,10 +196,10 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
         }
     }
 
-    test("should get 400: POST of preferences with additional bogus field to /archive_prefs/:id") {
+    test("should get 400: POST of preferences with additional bogus field to /archive/:id") {
         val randomId = Random.nextInt()
-        info("Calling POST /archive_prefs/" + randomId)
-        post("/archive_prefs/" + randomId,
+        info("Calling POST /archive/" + randomId)
+        post("/archive/" + randomId,
             """
               |{
               |  "enabled" : false,
@@ -221,10 +221,10 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
         }
     }
 
-    test("should get 400: POST of preferences with wrong enum in data_format to /archive_prefs/:id") {
+    test("should get 400: POST of preferences with wrong enum in data_format to /archive/:id") {
         val randomId = Random.nextInt()
-        info("Calling POST /archive_prefs/" + randomId)
-        post("/archive_prefs/" + randomId,
+        info("Calling POST /archive/" + randomId)
+        post("/archive/" + randomId,
             """
               |{
               |  "enabled": false,

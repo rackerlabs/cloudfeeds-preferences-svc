@@ -42,8 +42,8 @@ class MetadataTest extends ScalatraSuite with FunSuiteLike with InitDbTrait {
         }
     }
 
-    test("should get 200: GET /metadata/archive_prefs") {
-        get("/metadata/archive_prefs") {
+    test("should get 200: GET /metadata/archive") {
+        get("/metadata/archive") {
             println(body)
             status should equal (200)
             response.mediaType should equal (Some("application/json"))

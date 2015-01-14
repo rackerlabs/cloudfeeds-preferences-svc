@@ -46,8 +46,8 @@ def app_group = 'prefssvc'
 
 repositories {
     mavenLocal()
-    maven{ url "http://maven.research.rackspacecloud.com/content/repositories/snapshots/"}
-    maven{ url "http://maven.research.rackspacecloud.com/content/repositories/releases/"}
+    maven{ url "https://maven.research.rackspacecloud.com/content/repositories/snapshots/"}
+    maven{ url "https://maven.research.rackspacecloud.com/content/repositories/releases/"}
     mavenCentral()
     jcenter()
 }
@@ -79,7 +79,7 @@ dependencies {
         transitive = false
     }
     compile 'org.flywaydb:flyway-core:3.1'
-    compile 'com.rackspace.prefs:cloudfeeds-preferences-svc-db:1.1.3'
+    compile 'com.rackspace.prefs:cloudfeeds-preferences-svc-db:1.1.4'
     compile 'org.postgresql:postgresql:9.3-1102-jdbc41'
     testCompile 'org.scalatest:scalatest_2.10:2.1.7'
     testCompile 'org.scalatra:scalatra-scalatest_2.10:2.3.0'
@@ -125,8 +125,8 @@ extraArchive {
 
 nexus {
     sign = false
-    repositoryUrl = 'http://maven.research.rackspacecloud.com/content/repositories/releases/'
-    snapshotRepositoryUrl = 'http://maven.research.rackspacecloud.com/content/repositories/snapshots/'
+    repositoryUrl = 'https://maven.research.rackspacecloud.com/content/repositories/releases/'
+    snapshotRepositoryUrl = 'https://maven.research.rackspacecloud.com/content/repositories/snapshots/'
 }
 
 // defaults for rpm/deb packaging
@@ -179,17 +179,11 @@ ospackage {
 
     // check to see which jar got built for our symlink so the init script works
     def version_jar = package_name + '-' + version_clean + '.jar'
-    def snapshot_jar = package_name + '-' + version_snapshot + '.jar'
-    def built_jar
-    if (file('build/libs/' + version_jar).exists()) {
-        built_jar = version_jar
-    } else {
-        built_jar = snapshot_jar
-    }
-    println "ZZZ: " + built_jar
+    // println version_jar
 
     // create a symlink to named <app_name>.jar to the versioned jar
-    link(prefix_path + '/lib/' + app_name + '.jar', prefix_path + '/lib/' + built_jar)
+    // FIXME: It should be noted that this won't work with -SNAPSHOT versions
+    link(prefix_path + '/lib/' + app_name + '.jar', prefix_path + '/lib/' + version_jar)
 
 }
 
