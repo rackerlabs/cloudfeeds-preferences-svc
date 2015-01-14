@@ -7,6 +7,7 @@ values ('archive',
             array [
               string [ "JSON", "XML" ];
             ] {1,2} data_format;
+            string  default_region?;
             string  default_container_name = "FeedsArchives"?;
             object {
               string iad;
