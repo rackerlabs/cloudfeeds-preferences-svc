@@ -1,0 +1,58 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+        maven { url 'https://oss.sonatype.org/content/groups/public' }
+    }
+    dependencies {
+        classpath 'com.bmuschko:gradle-nexus-plugin:2.1.1'
+        classpath 'com.github.townsfolk:gradle-release:1.2'
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'maven'
+
+dependencies {
+    compile('org.flywaydb:flyway-commandline:3.1') {
+        transitive = false
+    }
+    compile 'org.flywaydb:flyway-core:3.1'
+    compile 'com.h2database:h2:1.4.182'
+    compile 'org.postgresql:postgresql:9.3-1102-jdbc41'
+}
+
+task buildZip(type: Zip) {
+
+    from sourceSets.main.output
+
+    into('lib') {
+        from configurations.runtime
+    }
+}
+
+artifacts {
+    archives(buildZip) {
+        name 'cloudfeeds-preferences-svc-db'
+        type 'zip'
+        builtBy buildZip
+    }
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: "https://maven.research.rackspacecloud.com/content/repositories/releases/")
+            snapshotRepository(url: "https://maven.research.rackspacecloud.com/content/repositories/snapshots/")
+
+            pom.groupId    = custom.group
+            pom.artifactId = project.parent.name + '-' + project.name
+            pom.version    = project.version
+            println('db: groupId=' + pom.groupId)
+            println('db: artifactId=' + pom.artifactId)
+            println('db: version=' + pom.version)
+        }
+    }
+}
+
+uploadArchives.dependsOn   buildZip

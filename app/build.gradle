@@ -1,4 +1,3 @@
-import org.apache.tools.ant.filters.ReplaceTokens
 
 buildscript {
     repositories {
@@ -7,7 +6,6 @@ buildscript {
         maven { url 'https://oss.sonatype.org/content/groups/public' }
     }
     dependencies {
-        classpath 'com.bmuschko:gradle-nexus-plugin:2.1.1'
         classpath 'com.github.townsfolk:gradle-release:1.2'
         classpath 'com.netflix.nebula:gradle-ospackage-plugin:2.0.3'
         classpath "org.flywaydb:flyway-gradle-plugin:3.1"
@@ -16,15 +14,11 @@ buildscript {
 
 apply plugin: 'scala'
 apply plugin: 'application'
-apply plugin: 'com.bmuschko.nexus'
-apply plugin: 'release'
+apply plugin: 'maven'
 apply plugin: 'os-package-base'
 apply plugin: 'flyway'
 
-defaultTasks  'clean', 'build'
-
 sourceCompatibility = '1.7'
-group = 'com.rackspace.prefs'
 mainClassName = "com.rackspace.prefs.WebApp"
 
 // our package name for the RPM
@@ -55,7 +49,6 @@ repositories {
 ext.scala_version = '2.10.4'
 ext.scalatra_version = '2.3.0'
 ext.jetty_version = '9.2.3.v20140905'
-//ext.jetty_version = '8.1.10.v20130312'
 
 dependencies {
     compile 'org.scala-lang:scala-compiler:' + scala_version
@@ -102,33 +95,6 @@ task uberjar(type: Jar) {
     }
 }
 
-modifyPom {
-    project {
-        name          'Cloud Feeds Preferences Service'
-        description   'A service that provides REST API access to set (and validate) / get a group of key/value property'
-        url           'http://github.com/rackerlabs/cloudfeeds-preferences-svc'
-        packaging     'jar'
-        inceptionYear '2014'
-
-        scm {
-            url        'https://github.com/rackerlabs/cloudfeeds-preferences-svc'
-            connection 'scm:git:ssh://git@github.com/rackerlabs/cloudfeeds-preferences-svc.git'
-        }
-    }
-}
-
-extraArchive {
-    sources = true
-    tests = true
-    javadoc = false
-}
-
-nexus {
-    sign = false
-    repositoryUrl = 'https://maven.research.rackspacecloud.com/content/repositories/releases/'
-    snapshotRepositoryUrl = 'https://maven.research.rackspacecloud.com/content/repositories/snapshots/'
-}
-
 // defaults for rpm/deb packaging
 ospackage {
     os = LINUX
@@ -155,7 +121,7 @@ ospackage {
         exclude '*.sh' // exclude pre/post scripts
         // set permissions
         user app_user
-        group app_group
+        permissionGroup app_group
         fileMode 0644
         fileType CONFIG | NOREPLACE
     }
@@ -167,14 +133,14 @@ ospackage {
         into 'bin'
         include 'preferences-service.init'
         user app_user
-        group app_group
+        permissionGroup app_group
     }
 
     // collect our jars
     from('build/libs') {
         into 'lib'
         user app_user
-        group app_group
+        permissionGroup app_group
     }
 
     // check to see which jar got built for our symlink so the init script works
@@ -206,16 +172,24 @@ artifacts {
     }
 }
 
-release {
-    failOnPublishNeeded = false
-    failOnCommitNeeded = false
-    failOnUnversionedFiles = false
-    tagPrefix = 'cloudfeeds-preferences-svc'
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: "https://maven.research.rackspacecloud.com/content/repositories/releases/")
+            snapshotRepository(url: "https://maven.research.rackspacecloud.com/content/repositories/snapshots/")
+
+            pom.groupId    = custom.group
+            pom.artifactId = project.parent.name + '-' + project.name
+            pom.version    = project.version
+            println('app: groupId=' + pom.groupId)
+            println('app: artifactId=' + pom.artifactId)
+            println('app: version=' + pom.version)
+        }
+    }
 }
 
 // 'gradle release' will also upload release to Nexus
 uploadArchives.dependsOn   uberjar
-createReleaseTag.dependsOn uploadArchives
 
 flyway {
     url  = "jdbc:h2:file:${buildDir}/db/test/preferencesdb;MODE=PostgreSQL;IGNORECASE=TRUE"
@@ -225,17 +199,12 @@ flyway {
     ]
 }
 
-//processTestResources {
-//    filter(ReplaceTokens, tokens: [buildDir: buildDir.getAbsolutePath()])
-//}
-
 // Gradle plugin has dependency on testClasses which creates circular dependency if
 // we were to have flyway tasks dependsOn testClasses. This is a small workaround/hack.
 // https://github.com/flyway/flyway/issues/775
 project.afterEvaluate {
     flywayClean.dependsOn -= testClasses
-    flywayMigrate.dependsOn = [processResources, processTestResources]
+    flywayMigrate.dependsOn = [':db:build', processResources, processTestResources]
 }
 
-testClasses.dependsOn flywayClean
-testClasses.dependsOn flywayMigrate
+testClasses.dependsOn flywayClean, flywayMigrate
