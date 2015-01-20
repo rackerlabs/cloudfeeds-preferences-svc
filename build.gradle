@@ -93,6 +93,6 @@ release {
     failOnUnversionedFiles = false
     tagPrefix = 'cloudfeeds-preferences-svc'
     // for testing on dev boxes
-    git.requireBranch = ''
+    //git.requireBranch = ''
 }
 
