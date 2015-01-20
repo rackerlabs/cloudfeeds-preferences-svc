@@ -68,6 +68,10 @@ task writeNewPom << {
     }.writeTo("$buildDir/newpom.xml")
 }
 
+task test {
+  dependsOn task(':db:test'), task(':app:test')
+}
+
 uploadArchives {
     repositories {
         mavenDeployer {
