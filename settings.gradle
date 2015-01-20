@@ -1,1 +1,5 @@
+
+// this is needed by the Release plugin
+rootProject.name = 'cloudfeeds-preferences-svc'
+
 include ':db', ':app'
