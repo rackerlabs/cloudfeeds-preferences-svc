@@ -14,7 +14,6 @@ buildscript {
 
 apply plugin: 'scala'
 apply plugin: 'application'
-apply plugin: 'maven'
 apply plugin: 'os-package-base'
 apply plugin: 'flyway'
 
@@ -175,15 +174,9 @@ artifacts {
 uploadArchives {
     repositories {
         mavenDeployer {
-            repository(url: "https://maven.research.rackspacecloud.com/content/repositories/releases/")
-            snapshotRepository(url: "https://maven.research.rackspacecloud.com/content/repositories/snapshots/")
-
             pom.groupId    = custom.group
             pom.artifactId = project.parent.name + '-' + project.name
             pom.version    = project.version
-            println('app: groupId=' + pom.groupId)
-            println('app: artifactId=' + pom.artifactId)
-            println('app: version=' + pom.version)
         }
     }
 }
