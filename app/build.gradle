@@ -21,7 +21,7 @@ sourceCompatibility = '1.7'
 mainClassName = "com.rackspace.prefs.WebApp"
 
 // our package name for the RPM
-def package_name = 'cloudfeeds-preferences-svc'
+def package_name = 'cloudfeeds-preferences-svc-app'
 // our app name used by the rpm stuff
 def app_name = 'preferences-service'
 // clean version number with no -SNAPSHOT
@@ -36,14 +36,6 @@ def config_path = '/etc/' + app_name
 def app_user = 'prefssvc'
 // group for the service, created via the preinstall.sh script
 def app_group = 'prefssvc'
-
-repositories {
-    mavenLocal()
-    maven{ url "https://maven.research.rackspacecloud.com/content/repositories/snapshots/"}
-    maven{ url "https://maven.research.rackspacecloud.com/content/repositories/releases/"}
-    mavenCentral()
-    jcenter()
-}
 
 ext.scala_version = '2.10.4'
 ext.scalatra_version = '2.3.0'
@@ -80,6 +72,7 @@ dependencies {
 
 // task to create one uber executable jar
 task uberjar(type: Jar) {
+    baseName = 'cloudfeeds-preferences-svc-app'
     from {
         sourceSets.main.output
     } {
