@@ -69,7 +69,15 @@ task writeNewPom << {
 }
 
 task test {
-  dependsOn task(':db:test'), task(':app:test')
+    dependsOn task(':db:test'), task(':app:test')
+}
+
+artifacts {
+    def app_artifact = custom.parentProject + '-app-' + project.version.minus('-SNAPSHOT') + '-1.noarch.rpm'
+    archives file: file('app/build/distributions/' + app_artifact), name: app_artifact, type: 'rpm', classifier: 'app'
+
+    def db_artifact = custom.parentProject + '-db-' + project.version.minus('-SNAPSHOT') + '.zip'
+    archives file: file('db/build/distributions/' + db_artifact), name: db_artifact, type: 'zip', classifier: 'db'
 }
 
 uploadArchives {
@@ -77,7 +85,7 @@ uploadArchives {
         mavenDeployer {
             pom.groupId    = project.group
             pom.artifactId = project.name
-            pom.version    = project.version
+            pom.version    = project.version.minus('-SNAPSHOT')
             //println('main: groupId=' + pom.groupId)
             //println('main: artifactId=' + pom.artifactId)
             //println('main: version=' + pom.version)

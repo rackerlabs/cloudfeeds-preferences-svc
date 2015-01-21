@@ -12,6 +12,8 @@ buildscript {
 
 apply plugin: 'java'
 
+archivesBaseName = custom.parentProject + '-' + project.name
+
 dependencies {
     compile('org.flywaydb:flyway-commandline:3.1') {
         transitive = false
@@ -22,9 +24,9 @@ dependencies {
 }
 
 task buildZip(type: Zip) {
-
     from sourceSets.main.output
 
+    baseName = custom.parentProject + '-' + project.name
     into('lib') {
         from configurations.runtime
     }
@@ -42,8 +44,9 @@ uploadArchives {
     repositories {
         mavenDeployer {
             pom.groupId    = custom.group
-            pom.artifactId = project.parent.name + '-' + project.name
+            pom.artifactId = custom.parentProject + '-' + project.name
             pom.version    = project.version
+            println("db: artifactId=" + pom.artifactId)
         }
     }
 }

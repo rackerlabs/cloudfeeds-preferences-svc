@@ -1,3 +1,4 @@
 ext.custom = [
-  group:          'com.rackspace.prefs.cloudfeeds'
+  group:          'com.rackspace.prefs.cloudfeeds',
+  parentProject:  'cloudfeeds-preferences-svc'
 ]
