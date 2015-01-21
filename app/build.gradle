@@ -17,6 +17,8 @@ apply plugin: 'application'
 apply plugin: 'os-package-base'
 apply plugin: 'flyway'
 
+archivesBaseName = custom.parentProject + '-' + project.name
+
 sourceCompatibility = '1.7'
 mainClassName = "com.rackspace.prefs.WebApp"
 
@@ -72,7 +74,7 @@ dependencies {
 
 // task to create one uber executable jar
 task uberjar(type: Jar) {
-    baseName = 'cloudfeeds-preferences-svc-app'
+    baseName = custom.parentProject + '-' + project.name
     from {
         sourceSets.main.output
     } {
@@ -149,6 +151,8 @@ ospackage {
 task buildRpm(type: Rpm, dependsOn: 'uberjar') {
     // this task inherits defaults from the ospackage section
 
+    baseName = custom.parentProject + '-' + project.name
+
     // the init script uses daemonize, require it
     requires('daemonize')
 
@@ -158,7 +162,7 @@ task buildRpm(type: Rpm, dependsOn: 'uberjar') {
 
 artifacts {
     archives(buildRpm) {
-        name   app_name
+        name   custom.parentProject + '-' + project.name
         type   'rpm'
         builtBy buildRpm
     }
@@ -168,8 +172,9 @@ uploadArchives {
     repositories {
         mavenDeployer {
             pom.groupId    = custom.group
-            pom.artifactId = project.parent.name + '-' + project.name
+            pom.artifactId = custom.parentProject + '-' + project.name
             pom.version    = project.version
+            println("app: artifactId=" + pom.artifactId)
         }
     }
 }
