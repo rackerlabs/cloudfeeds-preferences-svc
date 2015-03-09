@@ -27,4 +27,10 @@ trait InitDbTrait {
         preferences.delete
       }
     }
+
+    def dropMetadata(db: Database) {
+        db.withSession{ implicit session =>
+            preferencesMetadata.ddl.drop
+        }
+    }
 }

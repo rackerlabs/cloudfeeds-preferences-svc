@@ -2,7 +2,7 @@ package com.rackspace.prefs
 
 import com.nparry.orderly._
 import com.rackspace.prefs.model.DBTables._
-import com.rackspace.prefs.model.{Preferences, PreferencesMetadata}
+import com.rackspace.prefs.model.{DBTables, Preferences, PreferencesMetadata}
 import org.joda.time.DateTime
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra._
@@ -26,7 +26,14 @@ with JacksonJsonSupport {
     val logger =  LoggerFactory.getLogger(getClass)
 
     get("/") {
-        NotFound(jsonify("Invalid URI: /"))
+        NotFound(jsonifyError("Invalid URI: /"))
+    }
+
+    get("/status") {
+        db.withSession { implicit session =>
+           val metadataCount = Query(preferencesMetadata.length).first
+           jsonifyStatus(metadataCount)
+        }
     }
 
     get("/metadata/:preference_slug") {
@@ -34,7 +41,7 @@ with JacksonJsonSupport {
         contentType = formats("json")
         getMetadata(preferenceSlug) match {
             case Some(metadata: PreferencesMetadata) => metadata.schema
-            case None => NotFound(jsonify("Metadata preferences for /" + preferenceSlug + " not found"))
+            case None => NotFound(jsonifyError("Metadata preferences for /" + preferenceSlug + " not found"))
         }
     }
 
@@ -54,7 +61,7 @@ with JacksonJsonSupport {
 
             getPayloadQuery.list match {
                 case List(payload: String) => payload
-                case _ => NotFound(jsonify("Preferences for " + preferenceSlug + " with id " + id + " not found"))
+                case _ => NotFound(jsonifyError("Preferences for " + preferenceSlug + " with id " + id + " not found"))
             }
         }
     }
@@ -72,7 +79,7 @@ with JacksonJsonSupport {
                 orderly.validate(payload) match {
                     case head :: tail =>
                         // give them hints of what's wrong. Only print the first violation.
-                        BadRequest(jsonify("Preferences for /" + preferenceSlug + "/" + id +
+                        BadRequest(jsonifyError("Preferences for /" + preferenceSlug + "/" + id +
                             " does not validate properly. " + head.path + " " + head.message))
 
                     case Nil => {
@@ -103,7 +110,7 @@ with JacksonJsonSupport {
                     }
                 }
             }
-            case None => BadRequest(jsonify("Preferences for /" + preferenceSlug + " does not have any metadata"))
+            case None => BadRequest(jsonifyError("Preferences for /" + preferenceSlug + " does not have any metadata"))
         }
     }
 
@@ -128,14 +135,18 @@ with JacksonJsonSupport {
         }
     }
 
-    def jsonify(errorMessage: String) : String = {
+    def jsonifyError(errorMessage: String) : String = {
         "{ \"error\": \"" + errorMessage + "\" }"
     }
-  
+
+    def jsonifyStatus(metadataCount: Int) : String = {
+        "{ \"metadata-count\": " + metadataCount + " }"
+    }
+
     error {
       case e => {
         logger.error("Request failed with exception", e);
-        InternalServerError(jsonify("Request failed with exception:" + e + " message:" + e.getMessage))
+        InternalServerError(jsonifyError("Request failed with exception:" + e + " message:" + e.getMessage))
       }
     }
 }
