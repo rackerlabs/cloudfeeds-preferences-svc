@@ -27,9 +27,11 @@ class StatusTest extends ScalatraSuite with FunSuiteLike with InitDbTrait {
         addServlet(new PreferencesService(db), "/*")
         get("/status") {
             status should equal (200)
+            val countConversionFunc = {input: String => new Integer(input)}
+            JSON.perThreadNumberParser = countConversionFunc
             val prefStatus = JSON.parseFull(body)
             val statusMap = prefStatus.get.asInstanceOf[Map[String, Int]]
-            statusMap.get("metadata-count").get should equal (1.0)
+            statusMap.get("metadata-count").get should be > (0)
             println(body)
         }
     }
