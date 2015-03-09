@@ -38,9 +38,13 @@ class StatusTest extends ScalatraSuite with FunSuiteLike with InitDbTrait {
     // the Preferences Metadata table
     test("should get 500: GET /status when metadata table does not exist") {
         dropMetadata(db)
-        get("/status") {
-            status should equal(500)
-            println(body)
+        try {
+            get("/status") {
+                status should equal(500)
+                println(body)
+            }
+        } finally {
+            createMetadata(db)
         }
     }
 }
