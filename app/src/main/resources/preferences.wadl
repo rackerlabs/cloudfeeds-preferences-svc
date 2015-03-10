@@ -34,5 +34,9 @@
             </resource>
         </resource>
 
+        <!-- admin/monitoring resources -->
+        <resource id="status" path="status">
+            <method name="GET"/>
+        </resource>
     </resources>
 </application>
