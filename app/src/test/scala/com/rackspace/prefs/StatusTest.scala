@@ -32,7 +32,7 @@ class StatusTest extends ScalatraSuite with FunSuiteLike with InitDbTrait {
             val prefStatus = JSON.parseFull(body)
             val statusMap = prefStatus.get.asInstanceOf[Map[String, Int]]
             statusMap.get("metadata-count").get should be > (0)
-            println(body)
+            info(body)
         }
     }
 
@@ -43,7 +43,7 @@ class StatusTest extends ScalatraSuite with FunSuiteLike with InitDbTrait {
         try {
             get("/status") {
                 status should equal(500)
-                println(body)
+                info(body)
             }
         } finally {
             createMetadata(db)
