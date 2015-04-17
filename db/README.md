@@ -31,16 +31,16 @@ gradle clean buildZip
 
 ## How to run the App
 Run the build to generate zip file.
-Unzip the zip file(```build/distributions/cloudfeeds-preferences-svc-db.zip```) to a local folder.
+Unzip the zip file(```db/build/distributions/cloudfeeds-preferences-svc-db.zip```) to a local folder.
 Command to run flyway script on a h2 test db.
 
 ### Local H2 example
 ```
 gradle clean buildZip
-cd build/distributions/
+cd db/build/distributions/
 unzip cloudfeeds-preferences-svc-db.zip
 
-sh flyway -user=root -url=jdbc:h2:/Users/chan5120/testdb -locations:filesystem:./sql/schema migrate
+sh flyway -user=root -url=jdbc:h2:/Users/username/preferencesdb -locations=filesystem:./sql/schema migrate
 ```
 
 ### Remote PostgreSQL example
