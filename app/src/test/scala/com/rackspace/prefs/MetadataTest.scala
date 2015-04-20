@@ -50,6 +50,14 @@ class MetadataTest extends ScalatraSuite with FunSuiteLike with InitDbTrait {
         }
     }
 
+    test("should get 200: GET /metadata/archive/") {
+        get("/metadata/archive/") {
+            println(body)
+            status should equal (200)
+            response.mediaType should equal (Some("application/json"))
+        }
+    }
+
     test("should get 404 on non existent metadata: GET /metadata/doesnotexist") {
         get("/metadata/doesnotexist") {
             println(body)

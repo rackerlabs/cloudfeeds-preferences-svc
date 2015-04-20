@@ -77,6 +77,6 @@ This [c3p0-config.xml](https://github.com/rackerlabs/cloudfeeds-preferences-svc/
 By default, the Preferences Service app will try to load this file from classpath. This can be overriden by editing the ```preferences-service.conf``` file above.
 
 ### logback.xml
-This [logback.xml](https://github.com/rackerlabs/cloudfeeds-preferences-svc/blob/master/src/main/resources/c3p0-config.xml) file has the logging related configuration.
+This [logback.xml](https://github.com/rackerlabs/cloudfeeds-preferences-svc/blob/master/src/main/resources/logback.xml) file has the logging related configuration.
 
 By default, the Preferencs Service app will try to load this file from classpath. This can be overriden by editing the ```preferences-service.conf``` file above.

@@ -53,6 +53,13 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
             body should equal (prefs)
             response.mediaType should equal (Some("application/json"))
         }
+
+        info("Calling GET /archive/" + randomId + "/")
+        get("/archive/" + randomId + "/") {
+            status should equal (200)
+            body should equal (prefs)
+            response.mediaType should equal (Some("application/json"))
+        }
     }
 
     test("should get 404: GET on nonexistent preferences /nonexistent/:id") {
@@ -72,7 +79,6 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
 
     test("should get 201: POST of a new good preferences to /archive/:id") {
         val randomId = Random.nextInt()
-        info("Calling POST /archive/" + randomId)
         val prefs =
             """
               |{
@@ -88,7 +94,17 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |  }
               |}
             """.stripMargin
+        info("Calling POST /archive/" + randomId)
         post("/archive/" + randomId, prefs, Map("Content-Type" -> "application/json")) {
+            if ( status != 201 ) {
+                info(body)
+            }
+            status should equal (201)
+        }
+
+        val nextRandomId = randomId + 1
+        info("Calling POST /archive/" + nextRandomId + "/")
+        post("/archive/" + nextRandomId + "/", prefs, Map("Content-Type" -> "application/json")) {
             if ( status != 201 ) {
                 info(body)
             }
@@ -98,7 +114,6 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
 
     test("should get 201: POST of a new preferences with only one data_format to /archive/:id") {
         val randomId = Random.nextInt()
-        info("Calling POST /archive/" + randomId)
         val prefs =
             """
               |{
@@ -115,6 +130,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |  }
               |}
             """.stripMargin
+        info("Calling POST /archive/" + randomId)
         post("/archive/" + randomId, prefs, Map("Content-Type" -> "application/json")) {
             if ( status != 201 ) {
                 info(body)
@@ -122,51 +138,72 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
             }
             status should equal (201)
         }
+
+        val nextRandomId = randomId + 1
+        info("Calling POST /archive/" + nextRandomId + "/")
+        post("/archive/" + nextRandomId + "/", prefs, Map("Content-Type" -> "application/json")) {
+            if ( status != 201 ) {
+              info(body)
+              println(body)
+            }
+            status should equal (201)
+        }
     }
 
     test("should get 200: POST of a good preferences to existing /archive/:id") {
         val randomId = Random.nextInt()
+        val prefs_disabled =
+          """
+            |{
+            |  "enabled": false,
+            |  "data_format" : [ "JSON", "XML" ],
+            |  "default_archive_container_url" : "https://storage.stg.swift.racklabs.com/v1/StagingUS_6b881249-b992-44ef-9ad1-2b9f5107d2f9/FeedsArchives",
+            |  "archive_container_urls": {
+            |      "iad": "http://...",
+            |      "dfw": "http://...",
+            |      "ord": "http://...",
+            |      "lon": "http://...",
+            |      "hkg": "http://...",
+            |      "syd": "http://..."
+            |  }
+            |}
+          """.stripMargin
+
         info("Calling 1st POST /archive/" + randomId)
-        val prefs =
-            """
-              |{
-              |  "enabled": false,
-              |  "data_format" : [ "JSON", "XML" ],
-              |  "default_archive_container_url" : "https://storage.stg.swift.racklabs.com/v1/StagingUS_6b881249-b992-44ef-9ad1-2b9f5107d2f9/FeedsArchives",
-              |  "archive_container_urls": {
-              |      "iad": "http://...",
-              |      "dfw": "http://...",
-              |      "ord": "http://...",
-              |      "lon": "http://...",
-              |      "hkg": "http://...",
-              |      "syd": "http://..."
-              |  }
-              |}
-            """.stripMargin
-        post("/archive/" + randomId, prefs, Map("Content-Type" -> "application/json")) {
+        post("/archive/" + randomId, prefs_disabled, Map("Content-Type" -> "application/json")) {
             if ( status != 201 ) {
                 info(body)
             }
             status should equal (201)
         }
 
+        val prefs_enabled =
+          """
+            |{
+            |  "enabled": true,
+            |  "data_format" : [ "JSON", "XML" ],
+            |  "default_archive_container_url" : "https://storage.stg.swift.racklabs.com/v1/StagingUS_6b881249-b992-44ef-9ad1-2b9f5107d2f9/FeedsArchives",
+            |  "archive_container_urls": {
+            |      "iad": "http://...",
+            |      "dfw": "http://...",
+            |      "ord": "http://...",
+            |      "lon": "http://...",
+            |      "hkg": "http://...",
+            |      "syd": "http://..."
+            |  }
+            |}
+          """.stripMargin
+
         info("Calling 2nd POST /archive/" + randomId)
-        post("/archive/" + randomId,
-            """
-              |{
-              |  "enabled": true,
-              |  "data_format" : [ "JSON", "XML" ],
-              |  "default_archive_container_url" : "https://storage.stg.swift.racklabs.com/v1/StagingUS_6b881249-b992-44ef-9ad1-2b9f5107d2f9/FeedsArchives",
-              |  "archive_container_urls": {
-              |      "iad": "http://...",
-              |      "dfw": "http://...",
-              |      "ord": "http://...",
-              |      "lon": "http://...",
-              |      "hkg": "http://...",
-              |      "syd": "http://..."
-              |  }
-              |}
-            """.stripMargin, Map("Content-Type" -> "application/json")) {
+        post("/archive/" + randomId, prefs_enabled, Map("Content-Type" -> "application/json")) {
+            if ( status != 200 ) {
+                info(body)
+            }
+            status should equal (200)
+        }
+
+        info("Calling 3rd POST /archive/" + randomId + "/")
+        post("/archive/" + randomId + "/", prefs_enabled, Map("Content-Type" -> "application/json")) {
             if ( status != 200 ) {
                 info(body)
             }
