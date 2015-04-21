@@ -41,10 +41,11 @@ gradle clean buildRpm
 
 ## Setup
 
-For development purpose, the repo comes with a sample H2 database which should be copied to the path specified in c3p0-config.xml before running the app.
+For development purpose, gradle build will generate a H2 database which should be copied to the path specified in c3p0-config.xml before running the app.
 
 ```
-cp src/main/db/* ~/                                        
+gradle clean build
+cp app/build/db/test/preferencesdb.mv.db ~/preferencesdb.mv.db
 ```
 
 Note: The current c3p0-config.xml file in classpath expects this file in home directory. You can change ```jdbcUrl``` property to point to the location of your database.
@@ -53,7 +54,7 @@ Note: The current c3p0-config.xml file in classpath expects this file in home di
 Run the build to create an installable app. Then you should have a startup script in the ```build``` directory, which you can run:
 ```
 gradle clean installApp
-sh build/install/cloudfeeds-preferences-svc/bin/cloudfeeds-preferences-svc
+sh app/build/install/app/bin/app
 ```
 
 If you are running this on Mac and you get ```UnknownHostException```, it's probably because your Mac's hostname is not the same as localhost. To fix this, run the following:
@@ -76,6 +77,6 @@ This [c3p0-config.xml](https://github.com/rackerlabs/cloudfeeds-preferences-svc/
 By default, the Preferences Service app will try to load this file from classpath. This can be overriden by editing the ```preferences-service.conf``` file above.
 
 ### logback.xml
-This [logback.xml](https://github.com/rackerlabs/cloudfeeds-preferences-svc/blob/master/src/main/resources/c3p0-config.xml) file has the logging related configuration.
+This [logback.xml](https://github.com/rackerlabs/cloudfeeds-preferences-svc/blob/master/src/main/resources/logback.xml) file has the logging related configuration.
 
 By default, the Preferencs Service app will try to load this file from classpath. This can be overriden by editing the ```preferences-service.conf``` file above.

@@ -36,8 +36,9 @@ with JacksonJsonSupport {
         }
     }
 
-    get("/metadata/:preference_slug") {
-        val preferenceSlug = params("preference_slug")
+    get("""^/metadata/([^/?]+)/?""".r) {
+        val uriParts = multiParams("captures")
+        val preferenceSlug = uriParts(0)
         contentType = formats("json")
         getMetadata(preferenceSlug) match {
             case Some(metadata: PreferencesMetadata) => metadata.schema
@@ -46,7 +47,7 @@ with JacksonJsonSupport {
     }
 
     // anything that's not /metadata* goes here
-    get( """^/(?!metadata)(.*)/(.*)""".r) {
+    get( """^/(?!metadata)([^/?]*)/([^/?]*)""".r) {
         val uriParts = multiParams("captures")
         val preferenceSlug = uriParts(0)
         val id = uriParts(1)
@@ -66,10 +67,10 @@ with JacksonJsonSupport {
         }
     }
 
-    post("/:preference_slug/:id", request.getContentType() == "application/json") {
-
-        val preferenceSlug = params("preference_slug")
-        val id = params("id")
+    post( """^/([^/?]*)/([^/?]*)""".r, request.getContentType() == "application/json" ) {
+        val uriParts = multiParams("captures")
+        val preferenceSlug = uriParts(0)
+        val id = uriParts(1)
         val payload = request.body
 
         getMetadata(preferenceSlug) match {
