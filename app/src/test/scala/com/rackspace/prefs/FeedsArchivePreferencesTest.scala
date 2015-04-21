@@ -132,6 +132,16 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
         }
     }
 
+    test("should get 404: GET on preferences with extra resource in path /archive/:id/extra/stuff") {
+        val randomId = Random.nextInt()
+        createPreference(db, randomId.toString(), "archive", prefs_enable_all)
+
+        info("Calling GET /archive/" + randomId + "/extra/stuff")
+        get("/archive/" + randomId + "/extra/stuff") {
+          status should equal (404)
+        }
+    }
+
     test("should get 201: POST of a new good preferences to /archive/:id") {
         val randomId = Random.nextInt()
         info("Calling POST /archive/" + randomId)
