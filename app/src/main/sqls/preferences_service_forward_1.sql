@@ -1,24 +1,24 @@
-create table "PREFERENCES_METADATA" (
-   "SLUG" VARCHAR NOT NULL PRIMARY KEY,
-   "DESCRIPTION" VARCHAR NOT NULL,
-   "SCHEMA" VARCHAR NOT NULL
+create table "preferences_metadata" (
+   "slug" VARCHAR NOT NULL PRIMARY KEY,
+   "description" VARCHAR NOT NULL,
+   "schema" VARCHAR NOT NULL
 );
 
-create table "PREFERENCES" (
-   "ID" VARCHAR NOT NULL,
-   "PREFERENCES_METADATA_SLUG" VARCHAR NOT NULL,
-   "PAYLOAD" VARCHAR NOT NULL,
-   "CREATED" TIMESTAMP NOT NULL DEFAULT current_timestamp,
-   "UPDATED" TIMESTAMP NOT NULL DEFAULT current_timestamp
+create table "preferences" (
+   "id" VARCHAR NOT NULL,
+   "preferences_metadata_slug" VARCHAR NOT NULL,
+   "payload" VARCHAR NOT NULL,
+   "created" TIMESTAMP NOT NULL DEFAULT current_timestamp,
+   "updated" TIMESTAMP NOT NULL DEFAULT current_timestamp
 );
 
-alter table "PREFERENCES" add constraint "compound_pk" primary key (
-   "ID","PREFERENCES_METADATA_SLUG"
+alter table "preferences" add constraint "compound_pk" primary key (
+   "id","preferences_metadata_slug"
 );
 
-alter table "PREFERENCES" add constraint "PREFERENCES_METADATA_SLUG_FK" foreign key (
-   "PREFERENCES_METADATA_SLUG"
+alter table "preferences" add constraint "preferences_metadata_slug_fk" foreign key (
+   "preferences_metadata_slug"
 )
-references "PREFERENCES_METADATA"("SLUG") on
+references "preferences_metadata"("slug") on
 update NO ACTION on
 delete NO ACTION;
