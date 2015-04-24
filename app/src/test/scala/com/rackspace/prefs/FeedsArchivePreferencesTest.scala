@@ -324,6 +324,56 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
         }
     }
 
+    val invalidUriChars = List('!', '*', '(', ')', ';', ':', '@', '&', '=', '+', '$', ',', '?', '#', '[', ']', ' ')
+    invalidUriChars.foreach { testChar =>
+        // run 400 test for each invalid test char in default_archive_container_url
+        test("should get 400: POST of preferences with invalid default container name containing '" + testChar + "' to /archive/:id") {
+            val randomId = Random.nextInt()
+            info("Calling POST /archive/" + randomId)
+
+            val preferenceContent =
+                f"""
+                  |{
+                  |  "enabled" : true,
+                  |  "data_format" : [ "JSON", "XML" ],
+                  |  "default_archive_container_url" : "https://storage.stg.swift.racklabs.com/v1/StagingUS_6b881249-b992-44ef-9ad1-2b9f5107d2f9/Feeds-$testChar%s_Archives"
+                  |}
+                """.stripMargin
+
+            post("/archive/" + randomId, preferenceContent, Map("Content-Type" -> "application/json")) {
+                status should equal (400)
+                body should include ("contains invalid container name")
+            }
+        }
+
+        // run 400 test for each invalid test char in archive_container_urls
+        test("should get 400: POST of preferences with invalid container name containing '" + testChar + "' to /archive/:id") {
+            val randomId = Random.nextInt()
+            info("Calling POST /archive/" + randomId)
+
+            val preferenceContent =
+                f"""
+                  |{
+                  |  "enabled" : true,
+                  |  "data_format" : [ "JSON", "XML" ],
+                  |  "archive_container_urls": {
+                  |      "iad": "https://storage.stg.swift.racklabs.com/v1/StagingUS_6b881249-b992-44ef-9ad1-2b9f5107d2f9/Feeds-$testChar%s_Archives",
+                  |      "dfw": "https://storage.stg.swift.racklabs.com/v1/StagingUS_6b881249-b992-44ef-9ad1-2b9f5107d2f9/Feeds-$testChar%s_Archives",
+                  |      "ord": "https://storage.stg.swift.racklabs.com/v1/StagingUS_6b881249-b992-44ef-9ad1-2b9f5107d2f9/Feeds-$testChar%s_Archives",
+                  |      "lon": "https://storage.stg.swift.racklabs.com/v1/StagingUS_6b881249-b992-44ef-9ad1-2b9f5107d2f9/Feeds-$testChar%s_Archives",
+                  |      "hkg": "https://storage.stg.swift.racklabs.com/v1/StagingUS_6b881249-b992-44ef-9ad1-2b9f5107d2f9/Feeds-$testChar%s_Archives",
+                  |      "syd": "https://storage.stg.swift.racklabs.com/v1/StagingUS_6b881249-b992-44ef-9ad1-2b9f5107d2f9/Feeds-$testChar%s_Archives"
+                  |  }
+                  |}
+                """.stripMargin
+
+            post("/archive/" + randomId, preferenceContent, Map("Content-Type" -> "application/json")) {
+                status should equal (400)
+                body should include ("contains invalid container name")
+            }
+        }
+    }
+
     override def afterAll() {
         super.afterAll()
         clearData(db)

@@ -4,7 +4,7 @@ import com.nparry.orderly._
 import com.rackspace.prefs.model.DBTables._
 import com.rackspace.prefs.model.{DBTables, Preferences, PreferencesMetadata}
 import org.joda.time.DateTime
-import org.json4s.{DefaultFormats, Formats}
+import org.json4s.{JValue, JNothing, DefaultFormats, Formats}
 import org.scalatra._
 import org.scalatra.json._
 import org.scalatra.scalate.ScalateSupport
@@ -14,6 +14,7 @@ import scala.slick.driver.JdbcDriver.simple._
 import scala.slick.jdbc.JdbcBackend.Database
 import javax.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
+import com.rackspace.prefs.model.PreferenceValidate
 
 case class PreferencesService(db: Database) extends ScalatraServlet
 with ScalateSupport
@@ -82,35 +83,76 @@ with JacksonJsonSupport {
                             " does not validate properly. " + head.path + " " + head.message))
 
                     case Nil => {
-
-                        db.withSession { implicit session =>
-                            val prefsForIdandSlug = preferences.filter(prefs => prefs.id === id && prefs.preferencesMetadataId === metadata.id)
-
-                            prefsForIdandSlug.list match {
-                                case List(_: Preferences) => {
-
-                                    preferences
-                                        .filter(prefs => prefs.id === id && prefs.preferencesMetadataId === metadata.id)
-                                        .map(prefs => (prefs.payload, prefs.updated))
-                                        .update(payload, DateTime.now)
-
-                                    Ok()
-                                }
-                                case _ => {
-
-                                    preferences
-                                        .map(p => (p.id, p.preferencesMetadataId, p.payload, p.alternateId))
-                                        .insert(id, metadata.id.get, payload, getAlternateId(request))
-
-                                    Created()
-                                }
-                            }
-                        }
+                        // valid and non-empty json, write to db
+                        writePreference(metadata, preferenceSlug, id, payload)
                     }
                 }
             }
             case None => BadRequest(jsonifyError("Preferences for /" + preferenceSlug + " does not have any metadata"))
         }
+    }
+
+    def writePreference(metadata: PreferencesMetadata, preferenceSlug: String, id: String, payload: String): ActionResult = {
+        //write preference to db
+        validateContent(payload) match {
+            case PreferenceValidate.InvalidContainer => {
+                // payload has bad container name(s)
+                BadRequest(jsonifyError("Preferences for /" + preferenceSlug + " contains invalid container name"))
+            }
+            case PreferenceValidate.Ok => {
+                db.withSession { implicit session =>
+                    val prefsForIdandSlug = preferences.filter(prefs => prefs.id === id && prefs.preferencesMetadataId === metadata.id)
+
+                    prefsForIdandSlug.list match {
+                        case List(_: Preferences) => {
+                            preferences
+                              .filter(prefs => prefs.id === id && prefs.preferencesMetadataId === metadata.id)
+                              .map(prefs => (prefs.payload, prefs.updated))
+                              .update(payload, DateTime.now)
+
+                            Ok()
+                        }
+                        case _ => {
+                            preferences
+                              .map(p => (p.id, p.preferencesMetadataId, p.payload, p.alternateId))
+                              .insert(id, metadata.id.get, payload, getAlternateId(request))
+
+                            Created()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    def validateContent(payload: String): PreferenceValidate.Value = {
+        // validate the content of the payload
+
+        var validated = PreferenceValidate.Ok
+        val jsonContent = parse(payload)
+
+        // validate default_archive_container_url
+        val defaultContainer = jsonContent \ "default_archive_container_url"
+        if (!validContainer(defaultContainer)) { validated = PreferenceValidate.InvalidContainer }
+
+        // validate each archive_container_urls
+        val archiveContainers = (jsonContent \ "archive_container_urls").children
+        archiveContainers.foreach { container =>
+            if (!validContainer(container)) { validated = PreferenceValidate.InvalidContainer }
+        }
+
+        validated
+    }
+
+    def validContainer(container: JValue): Boolean = {
+        // verify that container name doesn't contain one of theses invalid character for a uri "!*();:@&=+$,\?#[]"
+        // the container name is the last string in the uri with pattern s1/s2/s3...
+        val InvalidUriChars = List('!', '*', '(', ')', ';', ':', '@', '&', '=', '+', '$', ',', '\\', '?', '#', '[', ']', ' ')
+        if (container != JNothing) {
+            val containerName = container.extract[String].split("/").last
+            if (InvalidUriChars.exists(containerName.contains(_))) false else true
+        }
+        else true
     }
 
     def getMetadata(slug: String): Option[PreferencesMetadata] = {
