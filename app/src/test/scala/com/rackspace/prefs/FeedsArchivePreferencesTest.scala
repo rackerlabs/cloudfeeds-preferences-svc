@@ -26,14 +26,14 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
       |{
       |  "enabled": true,
       |  "data_format" : [ "JSON", "XML" ],
-      |  "default_archive_container_url" : "https://storage.stg.swift.racklabs.com/v1/StagingUS_6b881249-b992-44ef-9ad1-2b9f5107d2f9/FeedsArchives",
+      |  "default_archive_container_url" : "https://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
       |  "archive_container_urls": {
-      |      "iad": "http://...",
-      |      "dfw": "http://...",
-      |      "ord": "http://...",
-      |      "lon": "http://...",
-      |      "hkg": "http://...",
-      |      "syd": "http://..."
+      |      "iad": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+      |      "dfw": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+      |      "ord": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+      |      "lon": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+      |      "hkg": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+      |      "syd": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives"
       |  }
       |}
     """.stripMargin
@@ -44,12 +44,12 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
       |  "enabled": true,
       |  "data_format" : [ "JSON", "XML" ],
       |  "archive_container_urls": {
-      |      "iad": "http://...",
-      |      "dfw": "http://...",
-      |      "ord": "http://...",
-      |      "lon": "http://...",
-      |      "hkg": "http://...",
-      |      "syd": "http://..."
+      |      "iad": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+      |      "dfw": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+      |      "ord": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+      |      "lon": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+      |      "hkg": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+      |      "syd": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives"
       |  }
       |}
     """.stripMargin
@@ -59,14 +59,14 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
       |{
       |  "enabled": true,
       |  "data_format" : [ "JSON" ],
-      |  "default_archive_container_url" : "https://storage.stg.swift.racklabs.com/v1/StagingUS_6b881249-b992-44ef-9ad1-2b9f5107d2f9/FeedsArchives",
+      |  "default_archive_container_url" : "https://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
       |  "archive_container_urls": {
-      |      "iad": "http://...",
-      |      "dfw": "http://...",
-      |      "ord": "http://...",
-      |      "lon": "http://...",
-      |      "hkg": "http://...",
-      |      "syd": "http://..."
+      |      "iad": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+      |      "dfw": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+      |      "ord": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+      |      "lon": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+      |      "hkg": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+      |      "syd": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives"
       |  }
       |}
     """.stripMargin
@@ -76,14 +76,14 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
       |{
       |  "enabled": false,
       |  "data_format" : [ "JSON", "XML" ],
-      |  "default_archive_container_url" : "https://storage.stg.swift.racklabs.com/v1/StagingUS_6b881249-b992-44ef-9ad1-2b9f5107d2f9/FeedsArchives",
+      |  "default_archive_container_url" : "https://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
       |  "archive_container_urls": {
-      |      "iad": "http://...",
-      |      "dfw": "http://...",
-      |      "ord": "http://...",
-      |      "lon": "http://...",
-      |      "hkg": "http://...",
-      |      "syd": "http://..."
+      |      "iad": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+      |      "dfw": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+      |      "ord": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+      |      "lon": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+      |      "hkg": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+      |      "syd": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives"
       |  }
       |}
     """.stripMargin
@@ -235,14 +235,14 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
             """
               |{
               |  "data_format" : [ "JSON", "XML" ],
-              |  "default_archive_container_url" : "https://storage.stg.swift.racklabs.com/v1/StagingUS_6b881249-b992-44ef-9ad1-2b9f5107d2f9/FeedsArchives",
+              |  "default_archive_container_url" : "https://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
               |  "archive_container_urls": {
-              |      "iad": "http://...",
-              |      "dfw": "http://...",
-              |      "ord": "http://...",
-              |      "lon": "http://...",
-              |      "hkg": "http://...",
-              |      "syd": "http://..."
+              |      "iad": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+              |      "dfw": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+              |      "ord": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+              |      "lon": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+              |      "hkg": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+              |      "syd": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives"
               |  }
               |}
             """.stripMargin, Map("Content-Type" -> "application/json")) {
@@ -260,14 +260,14 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |  "enabled" : false,
               |  "some_unknown_field": "asdfas",
               |  "data_format" : [ "JSON", "XML" ],
-              |  "default_archive_container_url" : "https://storage.stg.swift.racklabs.com/v1/StagingUS_6b881249-b992-44ef-9ad1-2b9f5107d2f9/FeedsArchives",
+              |  "default_archive_container_url" : "https://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
               |  "archive_container_urls": {
-              |      "iad": "http://...",
-              |      "dfw": "http://...",
-              |      "ord": "http://...",
-              |      "lon": "http://...",
-              |      "hkg": "http://...",
-              |      "syd": "http://..."
+              |      "iad": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+              |      "dfw": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+              |      "ord": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+              |      "lon": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+              |      "hkg": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+              |      "syd": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives"
               |  }
               |}
             """.stripMargin, Map("Content-Type" -> "application/json")) {
@@ -284,14 +284,14 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |{
               |  "enabled": false,
               |  "data_format" : [ "JSON", "BOGUS" ],
-              |  "default_archive_container_url" : "https://storage.stg.swift.racklabs.com/v1/StagingUS_6b881249-b992-44ef-9ad1-2b9f5107d2f9/FeedsArchives",
+              |  "default_archive_container_url" : "https://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
               |  "archive_container_urls": {
-              |      "iad": "http://...",
-              |      "dfw": "http://...",
-              |      "ord": "http://...",
-              |      "lon": "http://...",
-              |      "hkg": "http://...",
-              |      "syd": "http://..."
+              |      "iad": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+              |      "dfw": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+              |      "ord": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+              |      "lon": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+              |      "hkg": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+              |      "syd": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives"
               |  }
               |}
             """.stripMargin, Map("Content-Type" -> "application/json")) {
@@ -308,14 +308,14 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |{
               |  "enabled": false,
               |  "data_format" : [ "JSON", "BOGUS" ],
-              |  "default_archive_container_url" : "https://storage.stg.swift.racklabs.com/v1/StagingUS_6b881249-b992-44ef-9ad1-2b9f5107d2f9/FeedsArchives",
+              |  "default_archive_container_url" : "https://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
               |  "archive_container_urls": {
-              |      "iad": "http://...",
-              |      "dfw": "http://...",
-              |      "ord": "http://...",
-              |      "lon": "http://...",
-              |      "hkg": "http://...",
-              |      "syd": "http://..."
+              |      "iad": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+              |      "dfw": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+              |      "ord": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+              |      "lon": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+              |      "hkg": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+              |      "syd": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives"
               |  }
               |}
             """.stripMargin, Map("Content-Type" -> "application/json")) {
@@ -324,53 +324,95 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
         }
     }
 
-    val invalidUriChars = List('!', '*', '(', ')', ';', ':', '@', '&', '=', '+', '$', ',', '?', '#', '[', ']', ' ')
-    invalidUriChars.foreach { testChar =>
-        // run 400 test for each invalid test char in default_archive_container_url
-        test("should get 400: POST of preferences with invalid default container name containing '" + testChar + "' to /archive/:id") {
-            val randomId = Random.nextInt()
-            info("Calling POST /archive/" + randomId)
+    test("should get 400: POST of preferences with INVALID DEFAULT container URL (bad scheme) to /archive/:id") {
+        val randomId = Random.nextInt()
+        info("Calling POST /archive/" + randomId)
 
-            val preferenceContent =
-                f"""
-                  |{
-                  |  "enabled" : true,
-                  |  "data_format" : [ "JSON", "XML" ],
-                  |  "default_archive_container_url" : "https://storage.stg.swift.racklabs.com/v1/StagingUS_6b881249-b992-44ef-9ad1-2b9f5107d2f9/Feeds-$testChar%s_Archives"
-                  |}
-                """.stripMargin
-
-            post("/archive/" + randomId, preferenceContent, Map("Content-Type" -> "application/json")) {
-                status should equal (400)
-                body should include ("contains invalid container name")
-            }
+        val invalidUrl = "asdf://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives"
+        post("/archive/" + randomId,
+            f"""
+              |{
+              |  "enabled" : true,
+              |  "data_format" : [ "JSON", "XML" ],
+              |  "default_archive_container_url" : "$invalidUrl%s"
+              |}
+            """.stripMargin
+            , Map("Content-Type" -> "application/json")) {
+            status should equal (400)
+            body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl)
         }
+    }
 
-        // run 400 test for each invalid test char in archive_container_urls
-        test("should get 400: POST of preferences with invalid container name containing '" + testChar + "' to /archive/:id") {
-            val randomId = Random.nextInt()
-            info("Calling POST /archive/" + randomId)
+    test("should get 400: POST of preferences with INVALID DEFAULT container URL (malformed) to /archive/:id") {
+        val randomId = Random.nextInt()
+        info("Calling POST /archive/" + randomId)
 
-            val preferenceContent =
-                f"""
-                  |{
-                  |  "enabled" : true,
-                  |  "data_format" : [ "JSON", "XML" ],
-                  |  "archive_container_urls": {
-                  |      "iad": "https://storage.stg.swift.racklabs.com/v1/StagingUS_6b881249-b992-44ef-9ad1-2b9f5107d2f9/Feeds-$testChar%s_Archives",
-                  |      "dfw": "https://storage.stg.swift.racklabs.com/v1/StagingUS_6b881249-b992-44ef-9ad1-2b9f5107d2f9/Feeds-$testChar%s_Archives",
-                  |      "ord": "https://storage.stg.swift.racklabs.com/v1/StagingUS_6b881249-b992-44ef-9ad1-2b9f5107d2f9/Feeds-$testChar%s_Archives",
-                  |      "lon": "https://storage.stg.swift.racklabs.com/v1/StagingUS_6b881249-b992-44ef-9ad1-2b9f5107d2f9/Feeds-$testChar%s_Archives",
-                  |      "hkg": "https://storage.stg.swift.racklabs.com/v1/StagingUS_6b881249-b992-44ef-9ad1-2b9f5107d2f9/Feeds-$testChar%s_Archives",
-                  |      "syd": "https://storage.stg.swift.racklabs.com/v1/StagingUS_6b881249-b992-44ef-9ad1-2b9f5107d2f9/Feeds-$testChar%s_Archives"
-                  |  }
-                  |}
-                """.stripMargin
+        val invalidUrl = "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives/url with spaces"
+        post("/archive/" + randomId,
+            f"""
+              |{
+              |  "enabled" : true,
+              |  "data_format" : [ "JSON", "XML" ],
+              |  "default_archive_container_url" : "$invalidUrl%s"
+              |}
+            """.stripMargin
+            , Map("Content-Type" -> "application/json")) {
+            status should equal (400)
+            body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl)
+        }
+    }
 
-            post("/archive/" + randomId, preferenceContent, Map("Content-Type" -> "application/json")) {
-                status should equal (400)
-                body should include ("contains invalid container name")
-            }
+    test("should get 400: POST of preferences with INVALID container URL (bad scheme) to /archive/:id") {
+        val randomId = Random.nextInt()
+        info("Calling POST /archive/" + randomId)
+
+        val invalidUrl = "asdf://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives"
+        val preferenceContent =
+            f"""
+              |{
+              |  "enabled" : true,
+              |  "data_format" : [ "JSON", "XML" ],
+              |  "archive_container_urls": {
+              |      "iad": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+              |      "dfw": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+              |      "ord": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+              |      "lon": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+              |      "hkg": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+              |      "syd": "$invalidUrl%s"
+              |  }
+              |}
+            """.stripMargin
+
+        post("/archive/" + randomId, preferenceContent, Map("Content-Type" -> "application/json")) {
+            status should equal (400)
+            body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl)
+        }
+    }
+
+    test("should get 400: POST of preferences with INVALID container URL (malformed) to /archive/:id") {
+        val randomId = Random.nextInt()
+        info("Calling POST /archive/" + randomId)
+
+        val invalidUrl = "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives/url with spaces"
+        val preferenceContent =
+            f"""
+              |{
+              |  "enabled" : true,
+              |  "data_format" : [ "JSON", "XML" ],
+              |  "archive_container_urls": {
+              |      "iad": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+              |      "dfw": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+              |      "ord": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+              |      "lon": "$invalidUrl%s",
+              |      "hkg": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+              |      "syd": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives"
+              |  }
+              |}
+            """.stripMargin
+
+        post("/archive/" + randomId, preferenceContent, Map("Content-Type" -> "application/json")) {
+            status should equal (400)
+            body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl)
         }
     }
 

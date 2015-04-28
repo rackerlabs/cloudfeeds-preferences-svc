@@ -61,6 +61,7 @@ dependencies {
     compile 'com.nparry:orderly_2.10:1.0.6'
     compile 'com.github.fge:json-schema-validator:2.2.6'
     compile 'joda-time:joda-time:2.6'
+    compile 'commons-validator:commons-validator:1.4.1'
     compile('org.flywaydb:flyway-commandline:3.1') {
         transitive = false
     }
