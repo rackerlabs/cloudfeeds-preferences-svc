@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
 import org.apache.commons.validator.routines.UrlValidator
 import scala.util.control.Breaks._
+import java.net.{URLDecoder, URLEncoder}
 
 case class PreferencesService(db: Database) extends ScalatraServlet
 with ScalateSupport
@@ -125,7 +126,52 @@ with JacksonJsonSupport {
         if (container != JNothing) {
             val containerUrl = container.extract[String]
             if (!validator.isValid(containerUrl)) {
+                // validate url
                 result = BadRequest(jsonifyError("Preferences for /" + preferenceSlug + "/" + id + " has an invalid url: " + containerUrl))
+            }
+            else {
+                // validate container name in the url
+                result = validateContainerName(preferenceSlug, id, containerUrl)
+            }
+        }
+        result
+    }
+
+    def validateContainerName(preferenceSlug: String, id: String, containerUrl: String): ActionResult = {
+        // validate container name
+        var result:ActionResult = null
+
+        // this pattern will match url of format http[s]://hostname/rootpath/nastId/container_name, and capture container_name
+        val patternForContainer = "^https?://[^/]+/[^/]+/[^/]+/(.*)$".r
+        val containerName = {
+            patternForContainer.findFirstMatchIn(containerUrl) match {
+                case Some(m) => m.group(1).replaceAll("/$", "")   // get first captured group and remove trailing slash if present
+                case None => ""
+            }
+        }
+
+        if (containerName == "") {
+            // container name cannot be empty
+            result = BadRequest(jsonifyError("Preferences for /" + preferenceSlug + "/" + id + " is missing container name: " + containerUrl))
+        }
+        else {
+            // container name must be less than 256 bytes in length, url encoded, and does not contain '/'
+            if (containerName.length() > 255) {
+                // length of containerName is greater than 255 bytes, bad request
+                result = BadRequest(jsonifyError("Preferences for /" + preferenceSlug + "/" + id + " has a container name longer than 255 bytes: " + containerUrl))
+            }
+            else {
+                // check to see if container has special chars and url encoded
+                val decoded = URLDecoder.decode(containerName, "UTF-8")
+
+                if (decoded contains '/') {
+                    // containerName contain '/', bad request
+                    result = BadRequest(jsonifyError("Preferences for /" + preferenceSlug + "/" + id + " has an invalid container name containing '/': " + containerUrl))
+                }
+                else if (URLEncoder.encode(decoded, "UTF-8") != containerName) {
+                    // if re-encoding the decoded isn't the same as the original containerName, then container has special chars not encoded, bad request
+                    result = BadRequest(jsonifyError("Preferences for /" + preferenceSlug + "/" + id + " has an invalid container name with non-urlencoded special characters: " + containerUrl))
+                }
             }
         }
         result
@@ -185,9 +231,9 @@ with JacksonJsonSupport {
     }
 
     error {
-      case e => {
-        logger.error("Request failed with exception", e);
-        InternalServerError(jsonifyError("Request failed with exception:" + e + " message:" + e.getMessage))
-      }
+        case e => {
+            logger.error("Request failed with exception", e)
+            InternalServerError(jsonifyError("Request failed with exception:" + e + " message:" + e.getMessage))
+        }
     }
 }
