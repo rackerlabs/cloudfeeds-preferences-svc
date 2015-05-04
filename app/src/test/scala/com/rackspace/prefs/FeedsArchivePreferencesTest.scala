@@ -88,7 +88,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
       |}
     """.stripMargin
 
-    val encodedUrl = "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/Feeds%7E%21%40%23%24%25%5E%26*%28%29_%2B%3D-%60%7B%7D%7C%5B%5D%5C%3A%22%3B%27%3C%3E%3F%2C.Archive"
+    val encodedUrl = """http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/Feeds%20~!@$*()-+=_;,.Archive"""
     val prefs_enable_all_encoded =
     f"""
       |{
@@ -407,30 +407,34 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
         }
     }
 
-    test("should get 400: POST of preferences with INVALID container URL (malformed) to /archive/:id") {
-        val randomId = Random.nextInt()
-        info("Calling POST /archive/" + randomId)
+    // test malformed url with invalid characters:  white space ^`{}|[]<>
+    val invalidUrlChars = List(' ', '^', '`', '{', '}', '|', '[', ']', '<', '>')
+    invalidUrlChars.foreach { testChar =>
+        test("should get 400: POST of preferences with INVALID container URL (malformed '" + testChar + "' char) to /archive/:id") {
+            val randomId = Random.nextInt()
+            info("Calling POST /archive/" + randomId)
 
-        val invalidUrl = "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives/url with spaces"
-        val preferenceContent =
-            f"""
-              |{
-              |  "enabled" : true,
-              |  "data_format" : [ "JSON", "XML" ],
-              |  "archive_container_urls": {
-              |      "iad": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
-              |      "dfw": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
-              |      "ord": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
-              |      "lon": "$invalidUrl%s",
-              |      "hkg": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
-              |      "syd": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives"
-              |  }
-              |}
-            """.stripMargin
+            val invalidUrl = "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives/Feeds" + testChar + "Archives"
+            val preferenceContent =
+                f"""
+                  |{
+                  |  "enabled" : true,
+                  |  "data_format" : [ "JSON", "XML" ],
+                  |  "archive_container_urls": {
+                  |      "iad": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+                  |      "dfw": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+                  |      "ord": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+                  |      "lon": "$invalidUrl%s",
+                  |      "hkg": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+                  |      "syd": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives"
+                  |  }
+                  |}
+                """.stripMargin
 
-        post("/archive/" + randomId, preferenceContent, Map("Content-Type" -> "application/json")) {
-            status should equal (400)
-            body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl)
+            post("/archive/" + randomId, preferenceContent, Map("Content-Type" -> "application/json")) {
+                status should equal (400)
+                body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl)
+            }
         }
     }
 
@@ -491,7 +495,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
             |12345678901234567890123456789012345678901234567890
             |12345678901234567890123456789012345678901234567890
             |12345678901234567890123456789012345678901234567890
-            |123456
+            |%20_56
             |""".stripMargin.replaceAll("\n", "")
 
         post("/archive/" + randomId,
@@ -504,7 +508,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
             """.stripMargin
             , Map("Content-Type" -> "application/json")) {
             status should equal (400)
-            body should include ("Preferences for /archive/" + randomId + " has a container name longer than 255 bytes: " + invalidUrl)
+            body should include ("Preferences for /archive/" + randomId + " has an encoded container name longer than 255 bytes: " + invalidUrl)
         }
     }
 
@@ -520,7 +524,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |12345678901234567890123456789012345678901234567890
               |12345678901234567890123456789012345678901234567890
               |12345678901234567890123456789012345678901234567890
-              |123456
+              |%20_56
               |""".stripMargin.replaceAll("\n", "")
 
         post("/archive/" + randomId,
@@ -540,52 +544,56 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
             """.stripMargin
             , Map("Content-Type" -> "application/json")) {
             status should equal (400)
-            body should include ("Preferences for /archive/" + randomId + " has a container name longer than 255 bytes: " + invalidUrl)
+            body should include ("Preferences for /archive/" + randomId + " has an encoded container name longer than 255 bytes: " + invalidUrl)
         }
     }
 
-    test("should get 400: POST of preferences with INVALID DEFAULT container name (special chars not encoded) to /archive/:id") {
-        val randomId = Random.nextInt()
-        info("Calling POST /archive/" + randomId)
+    // test for invalid uri chars in container name
+    val invalidUriChars = List('#', '?', '%')
+    invalidUriChars.foreach { testChar =>
+        test("should get 400: POST of preferences with INVALID DEFAULT container name ('" + testChar + "' not encoded) to /archive/:id") {
+            val randomId = Random.nextInt()
+            info("Calling POST /archive/" + randomId)
 
-        val invalidUrl = "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/Feeds!@#?;Archive"
-        post("/archive/" + randomId,
-            f"""
-              |{
-              |  "enabled" : true,
-              |  "data_format" : [ "JSON", "XML" ],
-              |  "default_archive_container_url" : "$invalidUrl%s"
-              |}
-            """.stripMargin
-            , Map("Content-Type" -> "application/json")) {
-            status should equal (400)
-            body should include ("Preferences for /archive/" + randomId + " has an invalid container name with non-urlencoded special characters: " + invalidUrl)
+            val invalidUrl = "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/Feeds" + testChar + "Archive"
+            post("/archive/" + randomId,
+                f"""
+                  |{
+                  |  "enabled" : true,
+                  |  "data_format" : [ "JSON", "XML" ],
+                  |  "default_archive_container_url" : "$invalidUrl%s"
+                  |}
+                """.stripMargin
+                , Map("Content-Type" -> "application/json")) {
+                status should equal (400)
+                body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl + "\nUrl must be encoded and should not contain query parameters or url fragments.")
+            }
         }
-    }
 
-    test("should get 400: POST of preferences with INVALID container name (special chars not encoded) to /archive/:id") {
-        val randomId = Random.nextInt()
-        info("Calling POST /archive/" + randomId)
+        test("should get 400: POST of preferences with INVALID container name ('" + testChar + "' not encoded) to /archive/:id") {
+            val randomId = Random.nextInt()
+            info("Calling POST /archive/" + randomId)
 
-        val invalidUrl = "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/Feeds!@#?;Archive"
-        post("/archive/" + randomId,
-            f"""
-              |{
-              |  "enabled" : true,
-              |  "data_format" : [ "JSON", "XML" ],
-              |  "archive_container_urls": {
-              |      "iad": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
-              |      "dfw": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
-              |      "ord": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
-              |      "lon": "$invalidUrl%s",
-              |      "hkg": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
-              |      "syd": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives"
-              |  }
-              |}
-            """.stripMargin
-            , Map("Content-Type" -> "application/json")) {
-            status should equal (400)
-            body should include ("Preferences for /archive/" + randomId + " has an invalid container name with non-urlencoded special characters: " + invalidUrl)
+            val invalidUrl = "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/Feeds" + testChar + "Archive"
+            post("/archive/" + randomId,
+                f"""
+                  |{
+                  |  "enabled" : true,
+                  |  "data_format" : [ "JSON", "XML" ],
+                  |  "archive_container_urls": {
+                  |      "iad": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+                  |      "dfw": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+                  |      "ord": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+                  |      "lon": "$invalidUrl%s",
+                  |      "hkg": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+                  |      "syd": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives"
+                  |  }
+                  |}
+                """.stripMargin
+                , Map("Content-Type" -> "application/json")) {
+                status should equal (400)
+                body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl + "\nUrl must be encoded and should not contain query parameters or url fragments.")
+            }
         }
     }
 
@@ -658,7 +666,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
         val randomId = Random.nextInt()
         info("Calling POST /archive/" + randomId)
 
-        val invalidUrl = "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/Feeds!@#$Arch%3F%23ive"
+        val invalidUrl = "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/Feeds!@#?$Arch%3F%23ive"
         post("/archive/" + randomId,
             f"""
               |{
@@ -669,7 +677,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
             """.stripMargin
             , Map("Content-Type" -> "application/json")) {
             status should equal (400)
-            body should include ("Preferences for /archive/" + randomId + " has an invalid container name with non-urlencoded special characters: " + invalidUrl)
+            body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl + "\nUrl must be encoded and should not contain query parameters or url fragments.")
         }
     }
 
@@ -677,7 +685,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
         val randomId = Random.nextInt()
         info("Calling POST /archive/" + randomId)
 
-        val invalidUrl = "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/Feeds!@#$Arch%3F%23ive"
+        val invalidUrl = "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/Feeds!@#?$Arch%3F%23ive"
         post("/archive/" + randomId,
             f"""
               |{
@@ -695,7 +703,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
             """.stripMargin
             , Map("Content-Type" -> "application/json")) {
             status should equal (400)
-            body should include ("Preferences for /archive/" + randomId + " has an invalid container name with non-urlencoded special characters: " + invalidUrl)
+            body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl + "\nUrl must be encoded and should not contain query parameters or url fragments.")
         }
     }
 

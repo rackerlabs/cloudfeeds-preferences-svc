@@ -8,15 +8,15 @@ import org.json4s.{JValue, JNothing, DefaultFormats, Formats}
 import org.scalatra._
 import org.scalatra.json._
 import org.scalatra.scalate.ScalateSupport
-
-import collection.JavaConverters._
-import scala.slick.driver.JdbcDriver.simple._
-import scala.slick.jdbc.JdbcBackend.Database
-import javax.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
 import org.apache.commons.validator.routines.UrlValidator
+import org.springframework.web.util.UriUtils
+
+import scala.slick.driver.JdbcDriver.simple._
+import scala.slick.jdbc.JdbcBackend.Database
 import scala.util.control.Breaks._
-import java.net.{URLDecoder, URLEncoder}
+import collection.JavaConverters._
+import javax.servlet.http.HttpServletRequest
 
 case class PreferencesService(db: Database) extends ScalatraServlet
 with ScalateSupport
@@ -156,22 +156,31 @@ with JacksonJsonSupport {
         }
         else {
             // container name must be less than 256 bytes in length, url encoded, and does not contain '/'
-            if (containerName.length() > 255) {
-                // length of containerName is greater than 255 bytes, bad request
-                result = BadRequest(jsonifyError("Preferences for /" + preferenceSlug + "/" + id + " has a container name longer than 255 bytes: " + containerUrl))
-            }
-            else {
-                // check to see if container has special chars and url encoded
-                val decoded = URLDecoder.decode(containerName, "UTF-8")
+            val msgInvalidUrl =
+                "Preferences for /" + preferenceSlug + "/" + id + " has an invalid url: " + containerUrl +
+                "\nUrl must be encoded and should not contain query parameters or url fragments."
+
+            try {
+                // first decode the containerName
+                val decoded = UriUtils.decode(containerName, "UTF-8")
+
+                // then re-encode the decoded containerName
+                val reEncoded = UriUtils.encodePathSegment(decoded, "UTF-8")
 
                 if (decoded contains '/') {
                     // containerName contain '/', bad request
                     result = BadRequest(jsonifyError("Preferences for /" + preferenceSlug + "/" + id + " has an invalid container name containing '/': " + containerUrl))
                 }
-                else if (URLEncoder.encode(decoded, "UTF-8") != containerName) {
-                    // if re-encoding the decoded isn't the same as the original containerName, then container has special chars not encoded, bad request
-                    result = BadRequest(jsonifyError("Preferences for /" + preferenceSlug + "/" + id + " has an invalid container name with non-urlencoded special characters: " + containerUrl))
+                else if (reEncoded.length() >= 256) {
+                    // length of encoded containerName is greater than 255 bytes, bad request
+                    result = BadRequest(jsonifyError("Preferences for /" + preferenceSlug + "/" + id + " has an encoded container name longer than 255 bytes: " + containerUrl))
                 }
+                else if (reEncoded != containerName) {
+                    result = BadRequest(jsonifyError(msgInvalidUrl))
+                }
+            }
+            catch {
+                case e: Exception => result = BadRequest(jsonifyError(msgInvalidUrl + "\nError: " + e))
             }
         }
         result
