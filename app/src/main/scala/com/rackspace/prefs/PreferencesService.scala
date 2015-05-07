@@ -210,7 +210,7 @@ with JacksonJsonSupport {
                 //Removing any hex-characters from original.
                 //Encoding the resultant string should not change it. If it changes, it indicates there are still special chars.
 
-                val hexStrippedContainerName = containerName.replaceAll("%[0-9][0-9]", "")
+                val hexStrippedContainerName = containerName.replaceAll("%[A-Z0-9][A-Z0-9]", "")
                 val encodedHexStrippedContainerName = UriUtils.encodePathSegment(hexStrippedContainerName, "UTF-8")
 
                 if (hexStrippedContainerName != encodedHexStrippedContainerName) {
