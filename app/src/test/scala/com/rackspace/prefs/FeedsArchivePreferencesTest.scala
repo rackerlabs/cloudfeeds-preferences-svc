@@ -88,7 +88,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
       |}
     """.stripMargin
 
-    val encodedUrl = """http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/Feeds%20~!@$*()-+=_;,.Archive"""
+    val encodedUrl = """http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/Feeds%20%21%40%23%2D%3D%5F~!@$*()-+=_;,.Archive"""
     val prefs_enable_all_encoded =
     f"""
       |{
@@ -566,7 +566,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
                 """.stripMargin
                 , Map("Content-Type" -> "application/json")) {
                 status should equal (400)
-                body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl + "\nUrl must be encoded and should not contain query parameters or url fragments.")
+                body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl + "\nUrl must be encoded and should not contain query parameters or url fragments. Encoded container name cannot contain a forward slash(/) and must be less than 256 bytes in length.")
             }
         }
 
@@ -592,16 +592,17 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
                 """.stripMargin
                 , Map("Content-Type" -> "application/json")) {
                 status should equal (400)
-                body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl + "\nUrl must be encoded and should not contain query parameters or url fragments.")
+                body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl + "\nUrl must be encoded and should not contain query parameters or url fragments. Encoded container name cannot contain a forward slash(/) and must be less than 256 bytes in length.")
             }
         }
     }
+
 
     test("should get 400: POST of preferences with INVALID DEFAULT container name (with literal '/') to /archive/:id") {
         val randomId = Random.nextInt()
         info("Calling POST /archive/" + randomId)
 
-        val invalidUrl = "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/Feeds/Archive"
+        val invalidUrl = "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/Feeds#Archive"
         post("/archive/" + randomId,
             f"""
               |{
@@ -612,7 +613,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
             """.stripMargin
             , Map("Content-Type" -> "application/json")) {
             status should equal (400)
-            body should include ("Preferences for /archive/" + randomId + " has an invalid container name containing '/': " + invalidUrl)
+            body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl + "\nUrl must be encoded and should not contain query parameters or url fragments. Encoded container name cannot contain a forward slash(/) and must be less than 256 bytes in length.")
         }
     }
 
@@ -677,7 +678,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
             """.stripMargin
             , Map("Content-Type" -> "application/json")) {
             status should equal (400)
-            body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl + "\nUrl must be encoded and should not contain query parameters or url fragments.")
+            body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl + "\nUrl must be encoded and should not contain query parameters or url fragments. Encoded container name cannot contain a forward slash(/) and must be less than 256 bytes in length.")
         }
     }
 
@@ -703,7 +704,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
             """.stripMargin
             , Map("Content-Type" -> "application/json")) {
             status should equal (400)
-            body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl + "\nUrl must be encoded and should not contain query parameters or url fragments.")
+            body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl + "\nUrl must be encoded and should not contain query parameters or url fragments. Encoded container name cannot contain a forward slash(/) and must be less than 256 bytes in length.")
         }
     }
 

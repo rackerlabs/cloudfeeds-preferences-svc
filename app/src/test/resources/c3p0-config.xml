@@ -2,7 +2,7 @@
 <c3p0-config>
     <default-config>
         <property name="driverClass">org.h2.Driver</property>
-        <property name="jdbcUrl">jdbc:h2:file:./build/db/test/preferencesdb;MODE=PostgreSQL;IGNORECASE=TRUE</property>
+        <property name="jdbcUrl">jdbc:h2:file:./app/build/db/test/preferencesdb;MODE=PostgreSQL;IGNORECASE=TRUE</property>
         <property name="user">root</property>
         <property name="password"></property>
         <property name="minPoolSize">1</property>
