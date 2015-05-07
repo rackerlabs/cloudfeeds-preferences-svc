@@ -88,7 +88,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
       |}
     """.stripMargin
 
-    val encodedUrl = """http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/Feeds%20%21%40%23%2D%3D%5F~!@$*()-+=_;,.Archive"""
+    val encodedUrl = """http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/Feeds%20%21%40%23%2D%3D%5F%5f%f5~!@$*()-+=_;,.Archive"""
     val prefs_enable_all_encoded =
     f"""
       |{

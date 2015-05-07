@@ -171,67 +171,65 @@ with JacksonJsonSupport {
         }
         else {
 
-          if (containerName.length() >= 256) {
-            logger.debug(s"Encoded container name should be less than 256 bytes in length:[$containerUrl]")
-            
-            result = BadRequest(jsonifyError("Preferences for /" + preferenceSlug + "/" + id + " has an encoded container name longer than 255 bytes: " + containerUrl +
-              "\nUrl must be encoded and should not contain query parameters or url fragments. Encoded container name cannot contain a forward slash(/) and must be less than 256 bytes in length."))
-            
-          } else {
+            if (containerName.length() >= 256) {
+                logger.debug(s"Encoded container name should be less than 256 bytes in length:[$containerUrl]")
 
-            // container name must be less than 256 bytes in length, url encoded, and does not contain '/'
-            val msgInvalidUrl =
-              "Preferences for /" + preferenceSlug + "/" + id + " has an invalid url: " + containerUrl +
-                "\nUrl must be encoded and should not contain query parameters or url fragments. Encoded container name cannot contain a forward slash(/) and must be less than 256 bytes in length."
+                result = BadRequest(jsonifyError("Preferences for /" + preferenceSlug + "/" + id + " has an encoded container name longer than 255 bytes: " + containerUrl +
+                  "\nUrl must be encoded and should not contain query parameters or url fragments. Encoded container name cannot contain a forward slash(/) and must be less than 256 bytes in length."))
+            } else {
 
-            try {
+                // container name must be less than 256 bytes in length, url encoded, and does not contain '/'
+                val msgInvalidUrl =
+                    "Preferences for /" + preferenceSlug + "/" + id + " has an invalid url: " + containerUrl +
+                    "\nUrl must be encoded and should not contain query parameters or url fragments. Encoded container name cannot contain a forward slash(/) and must be less than 256 bytes in length."
 
-              // check to see if container has special chars and url encoded
-              // first decode the containerName
-              val decoded = UriUtils.decode(containerName, "UTF-8")
+                try {
 
-              //If decoding results with the same container name, either it hasnt been encoded or encoding doesnt actually change anything (Ex: a alpha-numeric string like "Tom")
-              if (containerName == decoded) {
+                    // check to see if container has special chars and url encoded
+                    // first decode the containerName
+                    val decoded = UriUtils.decode(containerName, "UTF-8")
 
-                //To make sure whether encoding changes anything
-                val encode = UriUtils.encodePathSegment(containerName, "UTF-8")
-                
-                // if encoding the container name isn't same as the original, then container has special chars that are not encoded, bad request
-                if (encode != containerName) {
-                  logger.debug(s"Encoding the container name isn't same as the original:[$containerUrl]")
-                  result = BadRequest(jsonifyError(msgInvalidUrl))
+                    //If decoding results with the same container name, either it hasnt been encoded or encoding doesnt actually change anything (Ex: a alpha-numeric string like "Tom")
+                    if (containerName == decoded) {
+
+                        //To make sure whether encoding changes anything
+                        val encode = UriUtils.encodePathSegment(containerName, "UTF-8")
+
+                        // if encoding the container name isn't same as the original, then container has special chars that are not encoded, bad request
+                        if (encode != containerName) {
+                            logger.debug(s"Encoding the container name isn't same as the original:[$containerUrl]")
+                            result = BadRequest(jsonifyError(msgInvalidUrl))
+                        }
+
+                    } else {
+                        //Since decoded container name is not same as the original, we can think container name is probably already encoded.
+                        //But they could have send mixed case where only part of the container name is encoded. So decoding results in a different container
+                        //name but that doesnt mean the entire container name is properly encoded.
+
+                        //Removing any hex-characters from original.
+                        //Encoding the resultant string should not change it. If it changes, it indicates there are still special chars.
+
+                        val hexStrippedContainerName = containerName.replaceAll("%[a-fA-F0-9][a-fA-F0-9]", "")
+                        val encodedHexStrippedContainerName = UriUtils.encodePathSegment(hexStrippedContainerName, "UTF-8")
+
+                        if (hexStrippedContainerName != encodedHexStrippedContainerName) {
+                            logger.debug(s"mixed case(partially encoded) container name:[$containerUrl]")
+                            // if encoding the container name isn't the same as the original, then container has special chars that are not encoded, bad request
+                            result = BadRequest(jsonifyError(msgInvalidUrl))
+                        }
+
+                        if (decoded contains '/') {
+                            logger.debug(s"Container name contains forward slash(/) which is invalid:[$containerUrl]")
+                            // containerName contains '/', bad request
+                            result = BadRequest(jsonifyError("Preferences for /" + preferenceSlug + "/" + id + " has an invalid container name containing '/': " + containerUrl +
+                                "\nUrl must be encoded and should not contain query parameters or url fragments."))
+                        }
+                    }
                 }
-                
-              } else {
-                //Since decoded container name is not same as the original, we can think container name is probably already encoded.
-                //But they could have send mixed case where only part of the container name is encoded. So decoding results in a different container
-                //name but that doesnt mean the entire container name is properly encoded.
-
-                //Removing any hex-characters from original.
-                //Encoding the resultant string should not change it. If it changes, it indicates there are still special chars.
-
-                val hexStrippedContainerName = containerName.replaceAll("%[A-Z0-9][A-Z0-9]", "")
-                val encodedHexStrippedContainerName = UriUtils.encodePathSegment(hexStrippedContainerName, "UTF-8")
-
-                if (hexStrippedContainerName != encodedHexStrippedContainerName) {
-                  logger.debug(s"mixed case(partially encoded) container name:[$containerUrl]")
-                  // if encoding the container name isn't the same as the original, then container has special chars that are not encoded, bad request
-                  result = BadRequest(jsonifyError(msgInvalidUrl))
+                catch {
+                    case e: Exception => result = BadRequest(jsonifyError(msgInvalidUrl + "\nError: " + e))
                 }
-
-                if (decoded contains '/') {
-                  logger.debug(s"Container name contains forward slash(/) which is invalid:[$containerUrl]")
-                  // containerName contains '/', bad request
-                  result = BadRequest(jsonifyError("Preferences for /" + preferenceSlug + "/" + id + " has an invalid container name containing '/': " + containerUrl +
-                    "\nUrl must be encoded and should not contain query parameters or url fragments."))
-                }
-              }
             }
-            catch {
-              case e: Exception => result = BadRequest(jsonifyError(msgInvalidUrl + "\nError: " + e))
-            }
-          }
-
         }
         result
     }
