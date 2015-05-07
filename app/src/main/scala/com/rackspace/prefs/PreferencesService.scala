@@ -4,16 +4,19 @@ import com.nparry.orderly._
 import com.rackspace.prefs.model.DBTables._
 import com.rackspace.prefs.model.{DBTables, Preferences, PreferencesMetadata}
 import org.joda.time.DateTime
-import org.json4s.{DefaultFormats, Formats}
+import org.json4s.{JValue, JNothing, DefaultFormats, Formats}
 import org.scalatra._
 import org.scalatra.json._
 import org.scalatra.scalate.ScalateSupport
+import org.slf4j.LoggerFactory
+import org.apache.commons.validator.routines.UrlValidator
+import org.springframework.web.util.UriUtils
 
-import collection.JavaConverters._
 import scala.slick.driver.JdbcDriver.simple._
 import scala.slick.jdbc.JdbcBackend.Database
+import scala.util.control.Breaks._
+import collection.JavaConverters._
 import javax.servlet.http.HttpServletRequest
-import org.slf4j.LoggerFactory
 
 case class PreferencesService(db: Database) extends ScalatraServlet
 with ScalateSupport
@@ -82,34 +85,176 @@ with JacksonJsonSupport {
                             " does not validate properly. " + head.path + " " + head.message))
 
                     case Nil => {
-
-                        db.withSession { implicit session =>
-                            val prefsForIdandSlug = preferences.filter(prefs => prefs.id === id && prefs.preferencesMetadataId === metadata.id)
-
-                            prefsForIdandSlug.list match {
-                                case List(_: Preferences) => {
-
-                                    preferences
-                                        .filter(prefs => prefs.id === id && prefs.preferencesMetadataId === metadata.id)
-                                        .map(prefs => (prefs.payload, prefs.updated))
-                                        .update(payload, DateTime.now)
-
-                                    Ok()
-                                }
-                                case _ => {
-
-                                    preferences
-                                        .map(p => (p.id, p.preferencesMetadataId, p.payload, p.alternateId))
-                                        .insert(id, metadata.id.get, payload, getAlternateId(request))
-
-                                    Created()
-                                }
-                            }
-                        }
+                        // valid and non-empty json, write to db
+                        validateAndWritePreference(metadata, preferenceSlug, id, payload)
                     }
                 }
             }
             case None => BadRequest(jsonifyError("Preferences for /" + preferenceSlug + " does not have any metadata"))
+        }
+    }
+
+    def validateAndWritePreference(metadata: PreferencesMetadata, preferenceSlug: String, id: String, payload: String): ActionResult = {
+        // validate payload
+        val jsonContent = parse(payload)
+
+        // validate default_archive_container_url
+        val defaultContainer = jsonContent \ "default_archive_container_url"
+        var validateError = validateContainer(preferenceSlug, id, defaultContainer)
+
+        //validate urls of archive_container_urls if defaultContainer is ok
+        if (validateError == null) {
+            val archiveContainers = (jsonContent \ "archive_container_urls").children
+            breakable {
+                archiveContainers.foreach { container =>
+                    // validate and break when first validation failure occurred
+                    validateError = validateContainer(preferenceSlug, id, container)
+                    if (validateError != null) break
+                }
+            }
+        }
+
+        // write to db if content pass validation
+        if (validateError != null) { validateError }
+        else { writePreferenceToDb(metadata, id, payload) }
+    }
+
+    def validateContainer(preferenceSlug: String, id: String, container: JValue): ActionResult = {
+        var result:ActionResult = null
+        val validator = new UrlValidator()
+
+        if (container != JNothing) {
+            val containerUrl = container.extract[String]
+            if (!validator.isValid(containerUrl)) {
+                // validate url
+                result = BadRequest(jsonifyError("Preferences for /" + preferenceSlug + "/" + id + " has an invalid url: " + containerUrl))
+            }
+            else {
+                // validate container name in the url
+                result = validateContainerName(preferenceSlug, id, containerUrl)
+            }
+        }
+        result
+    }
+
+  /**
+   * Cloud files has the following requirements for container name. This method validates to make sure the container name is compatible 
+   * with cloud files. 
+   * 
+   * The only restrictions on container names is that they cannot contain a forward slash (/) and must be less than 256 bytes in length. 
+   * Note that the length restriction applies to the name after it has been URL-encoded. For example, a container name of Course Docs 
+   * would be URL-encoded as Course%20Docs and is therefore 13 bytes in length rather than the expected 11.
+   * 
+   * http://docs.rackspace.com/files/api/v1/cf-devguide/content/Containers-d1e458.html
+   *
+   * @param preferenceSlug
+   * @param id
+   * @param containerUrl
+   * @return
+   */
+    def validateContainerName(preferenceSlug: String, id: String, containerUrl: String): ActionResult = {
+        // validate container name
+        var result:ActionResult = null
+
+        // this pattern will match url of format http[s]://hostname/rootpath/nastId/container_name, and capture container_name
+        val patternForContainer = "^https?://[^/]+/[^/]+/[^/]+/(.*)$".r
+        val containerName = {
+            patternForContainer.findFirstMatchIn(containerUrl) match {
+                case Some(m) => m.group(1).replaceAll("/$", "")   // get first captured group and remove trailing slash if present
+                case None => ""
+            }
+        }
+
+        if (containerName == "") {
+            // container name cannot be empty
+            result = BadRequest(jsonifyError("Preferences for /" + preferenceSlug + "/" + id + " is missing container name: " + containerUrl))
+        }
+        else {
+
+            if (containerName.length() >= 256) {
+                logger.debug(s"Encoded container name should be less than 256 bytes in length:[$containerUrl]")
+
+                result = BadRequest(jsonifyError("Preferences for /" + preferenceSlug + "/" + id + " has an encoded container name longer than 255 bytes: " + containerUrl +
+                  "\nUrl must be encoded and should not contain query parameters or url fragments. Encoded container name cannot contain a forward slash(/) and must be less than 256 bytes in length."))
+            } else {
+
+                // container name must be less than 256 bytes in length, url encoded, and does not contain '/'
+                val msgInvalidUrl =
+                    "Preferences for /" + preferenceSlug + "/" + id + " has an invalid url: " + containerUrl +
+                    "\nUrl must be encoded and should not contain query parameters or url fragments. Encoded container name cannot contain a forward slash(/) and must be less than 256 bytes in length."
+
+                try {
+
+                    // check to see if container has special chars and url encoded
+                    // first decode the containerName
+                    val decoded = UriUtils.decode(containerName, "UTF-8")
+
+                    //If decoding results with the same container name, either it hasnt been encoded or encoding doesnt actually change anything (Ex: a alpha-numeric string like "Tom")
+                    if (containerName == decoded) {
+
+                        //To make sure whether encoding changes anything
+                        val encode = UriUtils.encodePathSegment(containerName, "UTF-8")
+
+                        // if encoding the container name isn't same as the original, then container has special chars that are not encoded, bad request
+                        if (encode != containerName) {
+                            logger.debug(s"Encoding the container name isn't same as the original:[$containerUrl]")
+                            result = BadRequest(jsonifyError(msgInvalidUrl))
+                        }
+
+                    } else {
+                        //Since decoded container name is not same as the original, we can think container name is probably already encoded.
+                        //But they could have send mixed case where only part of the container name is encoded. So decoding results in a different container
+                        //name but that doesnt mean the entire container name is properly encoded.
+
+                        //Removing any hex-characters from original.
+                        //Encoding the resultant string should not change it. If it changes, it indicates there are still special chars.
+
+                        val hexStrippedContainerName = containerName.replaceAll("%[a-fA-F0-9][a-fA-F0-9]", "")
+                        val encodedHexStrippedContainerName = UriUtils.encodePathSegment(hexStrippedContainerName, "UTF-8")
+
+                        if (hexStrippedContainerName != encodedHexStrippedContainerName) {
+                            logger.debug(s"mixed case(partially encoded) container name:[$containerUrl]")
+                            // if encoding the container name isn't the same as the original, then container has special chars that are not encoded, bad request
+                            result = BadRequest(jsonifyError(msgInvalidUrl))
+                        }
+
+                        if (decoded contains '/') {
+                            logger.debug(s"Container name contains forward slash(/) which is invalid:[$containerUrl]")
+                            // containerName contains '/', bad request
+                            result = BadRequest(jsonifyError("Preferences for /" + preferenceSlug + "/" + id + " has an invalid container name containing '/': " + containerUrl +
+                                "\nUrl must be encoded and should not contain query parameters or url fragments."))
+                        }
+                    }
+                }
+                catch {
+                    case e: Exception => result = BadRequest(jsonifyError(msgInvalidUrl + "\nError: " + e))
+                }
+            }
+        }
+        result
+    }
+
+    def writePreferenceToDb(metadata: PreferencesMetadata, id: String, payload: String): ActionResult = {
+        db.withSession { implicit session =>
+            val prefsForIdandSlug = preferences.filter(prefs => prefs.id === id && prefs.preferencesMetadataId === metadata.id)
+
+            prefsForIdandSlug.list match {
+                case List(_: Preferences) => {
+                    preferences
+                      .filter(prefs => prefs.id === id && prefs.preferencesMetadataId === metadata.id)
+                      .map(prefs => (prefs.payload, prefs.updated))
+                      .update(payload, DateTime.now)
+
+                    Ok()
+                }
+                case _ => {
+                    preferences
+                      .map(p => (p.id, p.preferencesMetadataId, p.payload, p.alternateId))
+                      .insert(id, metadata.id.get, payload, getAlternateId(request))
+
+                    Created()
+                }
+            }
         }
     }
 
@@ -143,9 +288,9 @@ with JacksonJsonSupport {
     }
 
     error {
-      case e => {
-        logger.error("Request failed with exception", e);
-        InternalServerError(jsonifyError("Request failed with exception:" + e + " message:" + e.getMessage))
-      }
+        case e => {
+            logger.error("Request failed with exception", e)
+            InternalServerError(jsonifyError("Request failed with exception:" + e + " message:" + e.getMessage))
+        }
     }
 }
