@@ -67,7 +67,7 @@ dependencies {
         transitive = false
     }
     compile 'org.flywaydb:flyway-core:3.1'
-    compile 'com.rackspace.prefs.cloudfeeds:cloudfeeds-preferences-svc-db:1.2.2-SNAPSHOT'
+    compile project(':db')
     compile 'org.postgresql:postgresql:9.3-1102-jdbc41'
     testCompile 'org.scalatest:scalatest_2.10:2.1.7'
     testCompile 'org.scalatra:scalatra-scalatest_2.10:2.3.0'
