@@ -796,6 +796,169 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
         }
     }
 
+    test("should get 201: POST of good preferences with only the default and one data center (lon)") {
+        val randomId = Random.nextInt()
+        info("Calling POST /archive/" + randomId + "/")
+        post("/archive/" + randomId + "/",
+            f"""
+              |{
+              |  "enabled" : true,
+              |  "data_format" : [ "JSON", "XML" ],
+              |  "default_archive_container_url" : "https://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+              |  "archive_container_urls": {
+              |      "lon": "https://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchivesLon"
+              |  }
+              |}
+            """.stripMargin
+            , Map("Content-Type" -> "application/json")) {
+            if ( status != 201 ) {
+                info(body)
+            }
+            status should equal (201)
+        }
+    }
+
+    test("should get 200: POST of good preferences with only the default and two data center (lon, dfw)") {
+        val randomId = Random.nextInt()
+
+        info("Calling 1st POST /archive/" + randomId + "/")
+        post("/archive/" + randomId + "/", prefs_enable_all, Map("Content-Type" -> "application/json")) {
+          if ( status != 201 ) {
+            info(body)
+          }
+          status should equal (201)
+        }
+
+        info("Calling 2nd POST /archive/" + randomId + "/")
+        post("/archive/" + randomId + "/",
+            f"""
+              |{
+              |  "enabled" : true,
+              |  "data_format" : [ "JSON", "XML" ],
+              |  "default_archive_container_url" : "https://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+              |  "archive_container_urls": {
+              |      "lon": "https://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchivesLon",
+              |      "dfw": "https://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchivesDfw"
+              |  }
+              |}
+            """.stripMargin
+            , Map("Content-Type" -> "application/json")) {
+            if ( status != 200 ) {
+                info(body)
+            }
+            status should equal (200)
+        }
+    }
+
+    test("should get 400: POST of invalid preferences with NO default and only one data center (lon)") {
+        val randomId = Random.nextInt()
+        info("Calling POST /archive/" + randomId + "/")
+        post("/archive/" + randomId + "/",
+            f"""
+              |{
+              |  "enabled" : true,
+              |  "data_format" : [ "JSON", "XML" ],
+              |  "archive_container_urls": {
+              |      "lon": "https://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchivesLon"
+              |  }
+              |}
+            """.stripMargin
+            , Map("Content-Type" -> "application/json")) {
+            if ( status != 400 ) {
+                info(body)
+            }
+            status should equal (400)
+            body should include ("Preferences for /archive/" + randomId + " must have a default_container_url or must have all datacenter archive_container_urls present")
+        }
+    }
+
+    test("should get 400: POST of invalid preferences with NO default and missing one data center (lon)") {
+        val randomId = Random.nextInt()
+        info("Calling POST /archive/" + randomId + "/")
+        post("/archive/" + randomId + "/",
+            f"""
+              |{
+              |  "enabled" : true,
+              |  "data_format" : [ "JSON", "XML" ],
+              |  "archive_container_urls": {
+              |      "iad": "https://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchivesIad",
+              |      "dfw": "https://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchivesDfw",
+              |      "ord": "https://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchivesOrd",
+              |      "hkg": "https://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchivesHkg",
+              |      "syd": "https://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchivesSyd"
+              |  }
+              |}
+            """.stripMargin
+            , Map("Content-Type" -> "application/json")) {
+            if ( status != 400 ) {
+                info(body)
+            }
+            status should equal (400)
+            body should include ("Preferences for /archive/" + randomId + " must have a default_container_url or must have all datacenter archive_container_urls present")
+        }
+    }
+
+    test("should get 201: POST of good preferences with NO default and ALL data center") {
+      val randomId = Random.nextInt()
+      info("Calling POST /archive/" + randomId + "/")
+      post("/archive/" + randomId + "/",
+          f"""
+            |{
+            |  "enabled" : true,
+            |  "data_format" : [ "JSON", "XML" ],
+            |  "archive_container_urls": {
+            |      "syd": "https://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchivesSyd",
+            |      "hkg": "https://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchivesHkg",
+            |      "lon": "https://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchivesLon",
+            |      "dfw": "https://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchivesDfw",
+            |      "iad": "https://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchivesIad",
+            |      "ord": "https://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchivesOrd"
+            |  }
+            |}
+          """.stripMargin
+          , Map("Content-Type" -> "application/json")) {
+          if ( status != 201 ) {
+              info(body)
+          }
+          status should equal (201)
+      }
+    }
+
+    test("should get 200: POST of good preferences with NO default and ALL data center") {
+        val randomId = Random.nextInt()
+
+        info("Calling 1st POST /archive/" + randomId + "/")
+        post("/archive/" + randomId + "/", prefs_enable_all, Map("Content-Type" -> "application/json")) {
+            if ( status != 201 ) {
+                info(body)
+            }
+            status should equal (201)
+        }
+
+        info("Calling 2nd POST /archive/" + randomId + "/")
+        post("/archive/" + randomId + "/",
+            f"""
+              |{
+              |  "enabled" : true,
+              |  "data_format" : [ "JSON", "XML" ],
+              |  "archive_container_urls": {
+              |      "dfw": "https://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchivesDfw",
+              |      "iad": "https://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchivesIad",
+              |      "ord": "https://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchivesOrd",
+              |      "lon": "https://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchivesLon",
+              |      "syd": "https://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchivesSyd",
+              |      "hkg": "https://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchivesHkg"
+              |  }
+              |}
+            """.stripMargin
+            , Map("Content-Type" -> "application/json")) {
+            if ( status != 200 ) {
+                info(body)
+            }
+            status should equal (200)
+        }
+    }
+
     override def afterAll() {
         super.afterAll()
         clearData(db)

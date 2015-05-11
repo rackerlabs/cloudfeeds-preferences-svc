@@ -94,6 +94,14 @@ with JacksonJsonSupport {
         }
     }
 
+  /**
+   * Validate the preference json payload and write to the database
+   * @param metadata
+   * @param preferenceSlug
+   * @param id
+   * @param payload
+   * @return
+   */
     def validateAndWritePreference(metadata: PreferencesMetadata, preferenceSlug: String, id: String, payload: String): ActionResult = {
         // validate payload
         val jsonContent = parse(payload)
@@ -114,16 +122,52 @@ with JacksonJsonSupport {
             }
         }
 
+        // if container urls and names are ok, validate that either default container is provided
+        // or all datacenters container urls are provided
+        if (validateError == null) {
+            if ((defaultContainer == JNothing) && (!allDataCenterArePresent(preferenceSlug, id, jsonContent))) {
+                // default container was not provided, and not all data centers container urls are provided , bad request
+                validateError = BadRequest(jsonifyError("Preferences for /" + preferenceSlug + "/" + id + " must have a default_container_url or must have all datacenter archive_container_urls present." +
+                    " See Cloud Feeds documentation for a list of valid datacenters."))
+            }
+        }
+
         // write to db if content pass validation
         if (validateError != null) { validateError }
         else { writePreferenceToDb(metadata, id, payload) }
     }
 
+  /**
+   * true if all data centers are present, false otherwise
+   * @param preferenceSlug
+   * @param id
+   * @param preferenceJson
+   * @return
+   */
+  def allDataCenterArePresent(preferenceSlug: String, id: String, preferenceJson: JValue): Boolean = {
+      // extract "archive_container_urls": { datacenter: url } to Map(String, Any)
+      val containerUrls = (preferenceJson \ "archive_container_urls").extract[Map[String, Any]]
+      // check for all data centers and return boolean
+      containerUrls.contains("iad") &&
+      containerUrls.contains("dfw") &&
+      containerUrls.contains("ord") &&
+      containerUrls.contains("lon") &&
+      containerUrls.contains("hkg") &&
+      containerUrls.contains("syd")
+  }
+
+  /**
+   * Validate that the container url is valid and that the container name is valid
+   * @param preferenceSlug
+   * @param id
+   * @param container
+   * @return
+   */
     def validateContainer(preferenceSlug: String, id: String, container: JValue): ActionResult = {
         var result:ActionResult = null
-        val validator = new UrlValidator()
 
         if (container != JNothing) {
+            val validator = new UrlValidator()
             val containerUrl = container.extract[String]
             if (!validator.isValid(containerUrl)) {
                 // validate url
@@ -234,6 +278,14 @@ with JacksonJsonSupport {
         result
     }
 
+  /**
+   * Write the preference json to the database
+   *
+   * @param metadata
+   * @param id
+   * @param payload
+   * @return
+   */
     def writePreferenceToDb(metadata: PreferencesMetadata, id: String, payload: String): ActionResult = {
         db.withSession { implicit session =>
             val prefsForIdandSlug = preferences.filter(prefs => prefs.id === id && prefs.preferencesMetadataId === metadata.id)
