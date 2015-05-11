@@ -868,7 +868,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
                 info(body)
             }
             status should equal (400)
-            body should include ("Preferences for /archive/" + randomId + " is missing a default container or a datacenter container")
+            body should include ("Preferences for /archive/" + randomId + " must have a default_container_url or must have all datacenter archive_container_urls present")
         }
     }
 
@@ -894,7 +894,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
                 info(body)
             }
             status should equal (400)
-            body should include ("Preferences for /archive/" + randomId + " is missing a default container or a datacenter container")
+            body should include ("Preferences for /archive/" + randomId + " must have a default_container_url or must have all datacenter archive_container_urls present")
         }
     }
 

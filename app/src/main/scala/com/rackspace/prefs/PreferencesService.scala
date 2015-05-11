@@ -127,7 +127,8 @@ with JacksonJsonSupport {
         if (validateError == null) {
             if ((defaultContainer == JNothing) && (!allDataCenterArePresent(preferenceSlug, id, jsonContent))) {
                 // default container was not provided, and not all data centers container urls are provided , bad request
-                validateError = BadRequest(jsonifyError("Preferences for /" + preferenceSlug + "/" + id + " is missing a default container or a datacenter container"))
+                validateError = BadRequest(jsonifyError("Preferences for /" + preferenceSlug + "/" + id + " must have a default_container_url or must have all datacenter archive_container_urls present." +
+                    " See Cloud Feeds documentation for a list of valid datacenters."))
             }
         }
 
@@ -164,9 +165,9 @@ with JacksonJsonSupport {
    */
     def validateContainer(preferenceSlug: String, id: String, container: JValue): ActionResult = {
         var result:ActionResult = null
-        val validator = new UrlValidator()
 
         if (container != JNothing) {
+            val validator = new UrlValidator()
             val containerUrl = container.extract[String]
             if (!validator.isValid(containerUrl)) {
                 // validate url
