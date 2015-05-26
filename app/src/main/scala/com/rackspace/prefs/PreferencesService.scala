@@ -5,6 +5,7 @@ import com.rackspace.prefs.model.DBTables._
 import com.rackspace.prefs.model.{DBTables, Preferences, PreferencesMetadata}
 import org.joda.time.DateTime
 import org.json4s.{JValue, JNothing, DefaultFormats, Formats}
+import org.json4s.JsonDSL.WithDouble._
 import org.scalatra._
 import org.scalatra.json._
 import org.scalatra.scalate.ScalateSupport
@@ -271,7 +272,7 @@ with JacksonJsonSupport {
                     }
                 }
                 catch {
-                    case e: Exception => result = BadRequest(jsonifyError(msgInvalidUrl + "\nError: " + e))
+                    case e: Exception => result = BadRequest(jsonifyError(msgInvalidUrl + "\nException: " + e.getMessage()))
                 }
             }
         }
@@ -332,7 +333,8 @@ with JacksonJsonSupport {
     }
 
     def jsonifyError(errorMessage: String) : String = {
-        "{ \"error\": \"" + errorMessage + "\" }"
+        val json = ("error" -> errorMessage)
+        return pretty(render(json))
     }
 
     def jsonifyStatus(metadataCount: Int) : String = {
