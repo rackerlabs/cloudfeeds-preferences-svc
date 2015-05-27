@@ -5,6 +5,7 @@ import com.rackspace.prefs.model.DBTables._
 import com.rackspace.prefs.model.{DBTables, Preferences, PreferencesMetadata}
 import org.joda.time.DateTime
 import org.json4s.{JValue, JNothing, DefaultFormats, Formats}
+import org.json4s.JsonDSL.WithDouble._
 import org.scalatra._
 import org.scalatra.json._
 import org.scalatra.scalate.ScalateSupport
@@ -218,14 +219,14 @@ with JacksonJsonSupport {
             if (containerName.length() >= 256) {
                 logger.debug(s"Encoded container name should be less than 256 bytes in length:[$containerUrl]")
 
-                result = BadRequest(jsonifyError("Preferences for /" + preferenceSlug + "/" + id + " has an encoded container name longer than 255 bytes: " + containerUrl +
-                  "\nUrl must be encoded and should not contain query parameters or url fragments. Encoded container name cannot contain a forward slash(/) and must be less than 256 bytes in length."))
+                result = BadRequest(jsonifyError("Preferences for /" + preferenceSlug + "/" + id + " has an encoded container name longer than 255 bytes: " + containerUrl + ". " +
+                  "Url must be encoded and should not contain query parameters or url fragments. Encoded container name cannot contain a forward slash(/) and must be less than 256 bytes in length."))
             } else {
 
                 // container name must be less than 256 bytes in length, url encoded, and does not contain '/'
                 val msgInvalidUrl =
-                    "Preferences for /" + preferenceSlug + "/" + id + " has an invalid url: " + containerUrl +
-                    "\nUrl must be encoded and should not contain query parameters or url fragments. Encoded container name cannot contain a forward slash(/) and must be less than 256 bytes in length."
+                    "Preferences for /" + preferenceSlug + "/" + id + " has an invalid url: " + containerUrl + ". " +
+                    "Url must be encoded and should not contain query parameters or url fragments. Encoded container name cannot contain a forward slash(/) and must be less than 256 bytes in length."
 
                 try {
 
@@ -265,13 +266,13 @@ with JacksonJsonSupport {
                         if (decoded contains '/') {
                             logger.debug(s"Container name contains forward slash(/) which is invalid:[$containerUrl]")
                             // containerName contains '/', bad request
-                            result = BadRequest(jsonifyError("Preferences for /" + preferenceSlug + "/" + id + " has an invalid container name containing '/': " + containerUrl +
-                                "\nUrl must be encoded and should not contain query parameters or url fragments."))
+                            result = BadRequest(jsonifyError("Preferences for /" + preferenceSlug + "/" + id + " has an invalid container name containing '/': " + containerUrl + ". " +
+                                "Url must be encoded and should not contain query parameters or url fragments."))
                         }
                     }
                 }
                 catch {
-                    case e: Exception => result = BadRequest(jsonifyError(msgInvalidUrl + "\nError: " + e))
+                    case e: Exception => result = BadRequest(jsonifyError(msgInvalidUrl + " Reason: " + e.getMessage()))
                 }
             }
         }
@@ -332,7 +333,8 @@ with JacksonJsonSupport {
     }
 
     def jsonifyError(errorMessage: String) : String = {
-        "{ \"error\": \"" + errorMessage + "\" }"
+        val json = ("error" -> errorMessage)
+        return pretty(render(json))
     }
 
     def jsonifyStatus(metadataCount: Int) : String = {

@@ -10,6 +10,8 @@ import scala.io.Source
 import scala.slick.jdbc.JdbcBackend._
 import scala.util.Random
 import com.mchange.v2.c3p0.ComboPooledDataSource
+import org.json4s.jackson.JsonMethods._
+import org.json4s.{DefaultFormats, Formats}
 
 /**
  * User: shin4590
@@ -18,8 +20,10 @@ import com.mchange.v2.c3p0.ComboPooledDataSource
 @RunWith(classOf[JUnitRunner])
 class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with InitDbTrait {
 
+    implicit val jsonFormats: Formats = DefaultFormats
     val db = Database.forDataSource(new ComboPooledDataSource)
-    addServlet(new PreferencesService(db), "/*")
+    val preferencesService = new PreferencesService(db)
+    addServlet(preferencesService, "/*")
 
     val prefs_enable_all =
     """
@@ -566,7 +570,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
                 """.stripMargin
                 , Map("Content-Type" -> "application/json")) {
                 status should equal (400)
-                body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl + "\nUrl must be encoded and should not contain query parameters or url fragments. Encoded container name cannot contain a forward slash(/) and must be less than 256 bytes in length.")
+                body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl + ". Url must be encoded and should not contain query parameters or url fragments. Encoded container name cannot contain a forward slash(/) and must be less than 256 bytes in length.")
             }
         }
 
@@ -592,7 +596,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
                 """.stripMargin
                 , Map("Content-Type" -> "application/json")) {
                 status should equal (400)
-                body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl + "\nUrl must be encoded and should not contain query parameters or url fragments. Encoded container name cannot contain a forward slash(/) and must be less than 256 bytes in length.")
+                body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl + ". Url must be encoded and should not contain query parameters or url fragments. Encoded container name cannot contain a forward slash(/) and must be less than 256 bytes in length.")
             }
         }
     }
@@ -613,7 +617,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
             """.stripMargin
             , Map("Content-Type" -> "application/json")) {
             status should equal (400)
-            body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl + "\nUrl must be encoded and should not contain query parameters or url fragments. Encoded container name cannot contain a forward slash(/) and must be less than 256 bytes in length.")
+            body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl + ". Url must be encoded and should not contain query parameters or url fragments. Encoded container name cannot contain a forward slash(/) and must be less than 256 bytes in length.")
         }
     }
 
@@ -678,7 +682,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
             """.stripMargin
             , Map("Content-Type" -> "application/json")) {
             status should equal (400)
-            body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl + "\nUrl must be encoded and should not contain query parameters or url fragments. Encoded container name cannot contain a forward slash(/) and must be less than 256 bytes in length.")
+            body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl + ". Url must be encoded and should not contain query parameters or url fragments. Encoded container name cannot contain a forward slash(/) and must be less than 256 bytes in length.")
         }
     }
 
@@ -704,7 +708,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
             """.stripMargin
             , Map("Content-Type" -> "application/json")) {
             status should equal (400)
-            body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl + "\nUrl must be encoded and should not contain query parameters or url fragments. Encoded container name cannot contain a forward slash(/) and must be less than 256 bytes in length.")
+            body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl + ". Url must be encoded and should not contain query parameters or url fragments. Encoded container name cannot contain a forward slash(/) and must be less than 256 bytes in length.")
         }
     }
 
@@ -957,6 +961,21 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
             }
             status should equal (200)
         }
+    }
+
+    test("jsonifyError should return valid json string") {
+        // call the method with the errorMessage for testing
+        val testErrorMessage = "here's a string with \"special\" characters!\n%#?\\/:[]{}"
+        val jsonString = preferencesService.jsonifyError(testErrorMessage)
+
+        // parse the return string to make sure it's valid json
+        val json = parse(jsonString)
+        val jsonError = json \ "error"
+        assert(jsonError != null)
+
+        // validate the message
+        val returnedErrorString = jsonError.extract[String]
+        returnedErrorString should include (testErrorMessage)
     }
 
     override def afterAll() {
