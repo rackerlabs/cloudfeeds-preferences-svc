@@ -12,6 +12,7 @@ import org.scalatra.scalate.ScalateSupport
 import org.slf4j.LoggerFactory
 import org.apache.commons.validator.routines.UrlValidator
 import org.springframework.web.util.UriUtils
+import com.rackspace.feeds.test.framework.json.JsonRecognizer
 
 import scala.slick.driver.JdbcDriver.simple._
 import scala.slick.jdbc.JdbcBackend.Database
@@ -104,38 +105,44 @@ with JacksonJsonSupport {
    * @return
    */
     def validateAndWritePreference(metadata: PreferencesMetadata, preferenceSlug: String, id: String, payload: String): ActionResult = {
-        // validate payload
-        val jsonContent = parse(payload)
+        // check that payload is valid json
+        if (JsonRecognizer.isValidJson(payload)) {
+            // parse payload
+            val jsonContent = parse(payload)
 
-        // validate default_archive_container_url
-        val defaultContainer = jsonContent \ "default_archive_container_url"
-        var validateError = validateContainer(preferenceSlug, id, defaultContainer)
+            // validate default_archive_container_url
+            val defaultContainer = jsonContent \ "default_archive_container_url"
+            var validateError = validateContainer(preferenceSlug, id, defaultContainer)
 
-        //validate urls of archive_container_urls if defaultContainer is ok
-        if (validateError == null) {
-            val archiveContainers = (jsonContent \ "archive_container_urls").children
-            breakable {
-                archiveContainers.foreach { container =>
-                    // validate and break when first validation failure occurred
-                    validateError = validateContainer(preferenceSlug, id, container)
-                    if (validateError != null) break
+            //validate urls of archive_container_urls if defaultContainer is ok
+            if (validateError == null) {
+                val archiveContainers = (jsonContent \ "archive_container_urls").children
+                breakable {
+                    archiveContainers.foreach { container =>
+                        // validate and break when first validation failure occurred
+                        validateError = validateContainer(preferenceSlug, id, container)
+                        if (validateError != null) break
+                    }
                 }
             }
-        }
 
-        // if container urls and names are ok, validate that either default container is provided
-        // or all datacenters container urls are provided
-        if (validateError == null) {
-            if ((defaultContainer == JNothing) && (!allDataCenterArePresent(preferenceSlug, id, jsonContent))) {
-                // default container was not provided, and not all data centers container urls are provided , bad request
-                validateError = BadRequest(jsonifyError("Preferences for /" + preferenceSlug + "/" + id + " must have a default_container_url or must have all datacenter archive_container_urls present." +
-                    " See Cloud Feeds documentation for a list of valid datacenters."))
+            // if container urls and names are ok, validate that either default container is provided
+            // or all datacenters container urls are provided
+            if (validateError == null) {
+                if ((defaultContainer == JNothing) && (!allDataCenterArePresent(preferenceSlug, id, jsonContent))) {
+                    // default container was not provided, and not all data centers container urls are provided , bad request
+                    validateError = BadRequest(jsonifyError("Preferences for /" + preferenceSlug + "/" + id + " must have a default_container_url or must have all datacenter archive_container_urls present." +
+                        " See Cloud Feeds documentation for a list of valid datacenters."))
+                }
             }
-        }
 
-        // write to db if content pass validation
-        if (validateError != null) { validateError }
-        else { writePreferenceToDb(metadata, id, payload) }
+            // write to db if content pass validation
+            if (validateError != null) { validateError }
+            else { writePreferenceToDb(metadata, id, payload) }
+        }
+        else {
+            BadRequest(jsonifyError("Preferences for /" + preferenceSlug + "/" + id + " must have valid json formatted payload."))
+        }
     }
 
   /**

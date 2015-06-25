@@ -44,6 +44,7 @@ ext.scalatra_version = '2.3.0'
 ext.jetty_version = '9.2.3.v20140905'
 
 dependencies {
+    compile 'com.rackspace.feeds.test:framework.json:0.10'
     compile 'org.scala-lang:scala-compiler:' + scala_version
     compile 'org.scala-lang:scala-library:' + scala_version
     compile 'org.scalatra:scalatra_2.10:' + scalatra_version
