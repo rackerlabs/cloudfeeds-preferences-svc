@@ -12,13 +12,14 @@ import org.scalatra.scalate.ScalateSupport
 import org.slf4j.LoggerFactory
 import org.apache.commons.validator.routines.UrlValidator
 import org.springframework.web.util.UriUtils
-import com.rackspace.feeds.test.framework.json.JsonRecognizer
 
 import scala.slick.driver.JdbcDriver.simple._
 import scala.slick.jdbc.JdbcBackend.Database
 import scala.util.control.Breaks._
 import collection.JavaConverters._
 import javax.servlet.http.HttpServletRequest
+import com.fasterxml.jackson.core.{JsonParser, JsonFactory}
+import org.json4s.jackson.JsonMethods
 
 case class PreferencesService(db: Database) extends ScalatraServlet
 with ScalateSupport
@@ -106,7 +107,7 @@ with JacksonJsonSupport {
    */
     def validateAndWritePreference(metadata: PreferencesMetadata, preferenceSlug: String, id: String, payload: String): ActionResult = {
         // check that payload is valid json
-        if (JsonRecognizer.isValidJson(payload)) {
+        if (isValidJson(payload)) {
             // parse payload
             val jsonContent = parse(payload)
 
@@ -336,6 +337,32 @@ with JacksonJsonSupport {
                 Some(tenant)
             }
             case _            => None
+        }
+    }
+
+  /** *
+    * Verify that jsonString is valid json
+    * @param jsonString
+    * @return true if valid, false otherwise
+    */
+    def isValidJson(jsonString: String): Boolean = {
+        // using Jackson JsonFactory and JsonParser
+        val f: JsonFactory = JsonMethods.mapper.getFactory
+        try {
+            // parse the json
+            val p: JsonParser = f.createParser(jsonString)
+            // valid first token of json
+            mapper.readValue(p, classOf[JValue])
+
+            // check for more tokens: if there are more token, then jsonString is invalid;
+            // we check for this because the current version of the Jackson parser is forgiving and allow extra token such as
+            // ';', ',', or "{}" after the top level closing curly bracelet.
+            // valid json should only have one top level valid json body enclosed by opening and closing curly bracelets.
+            if (p.nextToken() == null) { true } else { false }
+        }
+        catch {
+            // failed to parse jsonString, not valid
+            case e:Exception => { false }
         }
     }
 
