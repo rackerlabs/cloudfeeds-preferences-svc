@@ -18,6 +18,8 @@ import scala.slick.jdbc.JdbcBackend.Database
 import scala.util.control.Breaks._
 import collection.JavaConverters._
 import javax.servlet.http.HttpServletRequest
+import com.fasterxml.jackson.core.{JsonParser, JsonFactory}
+import org.json4s.jackson.JsonMethods
 
 case class PreferencesService(db: Database) extends ScalatraServlet
 with ScalateSupport
@@ -95,75 +97,92 @@ with JacksonJsonSupport {
         }
     }
 
-  /**
-   * Validate the preference json payload and write to the database
-   * @param metadata
-   * @param preferenceSlug
-   * @param id
-   * @param payload
-   * @return
-   */
+    /**
+     * Validate the preference json payload and write to the database
+     * @param metadata
+     * @param preferenceSlug
+     * @param id
+     * @param payload
+     * @return
+     */
     def validateAndWritePreference(metadata: PreferencesMetadata, preferenceSlug: String, id: String, payload: String): ActionResult = {
-        // validate payload
+
+        // check that payload is valid json
+        var validateError = validateJson(preferenceSlug, id, payload)
+        if (validateError != null) return validateError
+
+        // parse payload
         val jsonContent = parse(payload)
+        val defaultContainer = jsonContent \ "default_archive_container_url"
 
         // validate default_archive_container_url
-        val defaultContainer = jsonContent \ "default_archive_container_url"
-        var validateError = validateContainer(preferenceSlug, id, defaultContainer)
+        validateError = validateContainer(preferenceSlug, id, defaultContainer)
+        if (validateError != null) return validateError
 
         //validate urls of archive_container_urls if defaultContainer is ok
-        if (validateError == null) {
-            val archiveContainers = (jsonContent \ "archive_container_urls").children
-            breakable {
-                archiveContainers.foreach { container =>
-                    // validate and break when first validation failure occurred
-                    validateError = validateContainer(preferenceSlug, id, container)
-                    if (validateError != null) break
-                }
+        val archiveContainers = (jsonContent \ "archive_container_urls").children
+        breakable {
+            archiveContainers.foreach { container =>
+                // validate and break when first validation failure occurred
+                validateError = validateContainer(preferenceSlug, id, container)
+                if (validateError != null) break
             }
         }
+        if (validateError != null) return validateError
 
         // if container urls and names are ok, validate that either default container is provided
         // or all datacenters container urls are provided
-        if (validateError == null) {
-            if ((defaultContainer == JNothing) && (!allDataCenterArePresent(preferenceSlug, id, jsonContent))) {
-                // default container was not provided, and not all data centers container urls are provided , bad request
-                validateError = BadRequest(jsonifyError("Preferences for /" + preferenceSlug + "/" + id + " must have a default_container_url or must have all datacenter archive_container_urls present." +
-                    " See Cloud Feeds documentation for a list of valid datacenters."))
-            }
+        if ((defaultContainer == JNothing) && (!allDataCenterArePresent(preferenceSlug, id, jsonContent))) {
+            // default container was not provided, and not all data centers container urls are provided , bad request
+            return BadRequest(jsonifyError("Preferences for /" + preferenceSlug + "/" + id + " must have a default_container_url or must have all datacenter archive_container_urls present." +
+                " See Cloud Feeds documentation for a list of valid datacenters."))
         }
 
         // write to db if content pass validation
-        if (validateError != null) { validateError }
-        else { writePreferenceToDb(metadata, id, payload) }
+        writePreferenceToDb(metadata, id, payload)
     }
 
-  /**
-   * true if all data centers are present, false otherwise
-   * @param preferenceSlug
-   * @param id
-   * @param preferenceJson
-   * @return
-   */
-  def allDataCenterArePresent(preferenceSlug: String, id: String, preferenceJson: JValue): Boolean = {
-      // extract "archive_container_urls": { datacenter: url } to Map(String, Any)
-      val containerUrls = (preferenceJson \ "archive_container_urls").extract[Map[String, Any]]
-      // check for all data centers and return boolean
-      containerUrls.contains("iad") &&
-      containerUrls.contains("dfw") &&
-      containerUrls.contains("ord") &&
-      containerUrls.contains("lon") &&
-      containerUrls.contains("hkg") &&
-      containerUrls.contains("syd")
-  }
+    /**
+      * Verify that jsonString is valid json
+      * @param preferenceSlug
+      * @param id
+      * @param payload
+      * @return
+      */
+    def validateJson(preferenceSlug: String, id: String, payload: String): ActionResult = {
+        // using Jackson JsonFactory and JsonParser
+        var result:ActionResult = null
+        val f: JsonFactory = JsonMethods.mapper.getFactory
+        try {
+            // parse the json
+            val p: JsonParser = f.createParser(payload)
+            // valid first token of json
+            mapper.readValue(p, classOf[JValue])
 
-  /**
-   * Validate that the container url is valid and that the container name is valid
-   * @param preferenceSlug
-   * @param id
-   * @param container
-   * @return
-   */
+            // check for more tokens: if there are more token, then jsonString is invalid, return BadRequest;
+            // we check for this because the current version of the Jackson parser is forgiving and allow extra token such as
+            // ';', ',', or "{}" after the top level closing curly bracelet.
+            // valid json should only have one top level valid json body enclosed by opening and closing curly bracelets.
+            if (p.nextToken != null) {
+                result = BadRequest(jsonifyError("Preferences for /" + preferenceSlug + "/" + id + " have more than one json body."))
+            }
+        }
+        catch {
+            // failed to parse jsonString, not valid
+            case e: Exception => {
+              result = BadRequest(jsonifyError("Preferences for /" + preferenceSlug + "/" + id + " must have valid json formatted payload. " + e.getMessage))
+            }
+        }
+        result
+    }
+
+    /**
+     * Validate that the container url is valid and that the container name is valid
+     * @param preferenceSlug
+     * @param id
+     * @param container
+     * @return
+     */
     def validateContainer(preferenceSlug: String, id: String, container: JValue): ActionResult = {
         var result:ActionResult = null
 
@@ -182,21 +201,21 @@ with JacksonJsonSupport {
         result
     }
 
-  /**
-   * Cloud files has the following requirements for container name. This method validates to make sure the container name is compatible 
-   * with cloud files. 
-   * 
-   * The only restrictions on container names is that they cannot contain a forward slash (/) and must be less than 256 bytes in length. 
-   * Note that the length restriction applies to the name after it has been URL-encoded. For example, a container name of Course Docs 
-   * would be URL-encoded as Course%20Docs and is therefore 13 bytes in length rather than the expected 11.
-   * 
-   * http://docs.rackspace.com/files/api/v1/cf-devguide/content/Containers-d1e458.html
-   *
-   * @param preferenceSlug
-   * @param id
-   * @param containerUrl
-   * @return
-   */
+    /**
+     * Cloud files has the following requirements for container name. This method validates to make sure the container name is compatible
+     * with cloud files.
+     *
+     * The only restrictions on container names is that they cannot contain a forward slash (/) and must be less than 256 bytes in length.
+     * Note that the length restriction applies to the name after it has been URL-encoded. For example, a container name of Course Docs
+     * would be URL-encoded as Course%20Docs and is therefore 13 bytes in length rather than the expected 11.
+     *
+     * http://docs.rackspace.com/files/api/v1/cf-devguide/content/Containers-d1e458.html
+     *
+     * @param preferenceSlug
+     * @param id
+     * @param containerUrl
+     * @return
+     */
     def validateContainerName(preferenceSlug: String, id: String, containerUrl: String): ActionResult = {
         // validate container name
         var result:ActionResult = null
@@ -272,21 +291,40 @@ with JacksonJsonSupport {
                     }
                 }
                 catch {
-                    case e: Exception => result = BadRequest(jsonifyError(msgInvalidUrl + " Reason: " + e.getMessage()))
+                    case e: Exception => result = BadRequest(jsonifyError(msgInvalidUrl + " Reason: " + e.getMessage))
                 }
             }
         }
         result
     }
 
-  /**
-   * Write the preference json to the database
-   *
-   * @param metadata
-   * @param id
-   * @param payload
-   * @return
-   */
+    /**
+     * true if all data centers are present, false otherwise
+     * @param preferenceSlug
+     * @param id
+     * @param preferenceJson
+     * @return
+     */
+    def allDataCenterArePresent(preferenceSlug: String, id: String, preferenceJson: JValue): Boolean = {
+        // extract "archive_container_urls": { datacenter: url } to Map(String, Any)
+        val containerUrls = (preferenceJson \ "archive_container_urls").extract[Map[String, Any]]
+        // check for all data centers and return boolean
+        containerUrls.contains("iad") &&
+        containerUrls.contains("dfw") &&
+        containerUrls.contains("ord") &&
+        containerUrls.contains("lon") &&
+        containerUrls.contains("hkg") &&
+        containerUrls.contains("syd")
+    }
+
+    /**
+     * Write the preference json to the database
+     *
+     * @param metadata
+     * @param id
+     * @param payload
+     * @return
+     */
     def writePreferenceToDb(metadata: PreferencesMetadata, id: String, payload: String): ActionResult = {
         db.withSession { implicit session =>
             val prefsForIdandSlug = preferences.filter(prefs => prefs.id === id && prefs.preferencesMetadataId === metadata.id)
