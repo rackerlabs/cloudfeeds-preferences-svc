@@ -1005,7 +1005,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |}
             """.stripMargin, Map("Content-Type" -> "application/json")) {
             status should equal (400)
-            body should include ("must have valid json formatted payload")
+            body should include ("have more than one json body")
         }
     }
 
