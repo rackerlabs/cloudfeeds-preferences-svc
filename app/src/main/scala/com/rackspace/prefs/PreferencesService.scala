@@ -170,7 +170,7 @@ with JacksonJsonSupport {
         catch {
             // failed to parse jsonString, not valid
             case e: Exception => {
-              logger.error(s"Invalid json payload:[$payload] sent for for id:[$id]. Failed parsing with exception: ${e.getMessage}")
+              logger.error(s"Invalid json payload:[$payload] sent for for id:[$id]. Failed parsing with exception: ${e.getMessage}", e)
               result = BadRequest(jsonifyError("Preferences for /" + preferenceSlug + "/" + id + " must have valid json formatted payload. " + e.getMessage))
             }
         }
@@ -293,7 +293,7 @@ with JacksonJsonSupport {
                 }
                 catch {
                     case e: Exception => {
-                        logger.error(s"Validating container name in the url:[$containerUrl] for id:[$id] failed with exception: ${e.getMessage}")
+                        logger.error(s"Validating container name in the url:[$containerUrl] for id:[$id] failed with exception: ${e.getMessage}", e)
                         result = BadRequest(jsonifyError(msgInvalidUrl + " Reason: " + e.getMessage))
                     }
                 }
