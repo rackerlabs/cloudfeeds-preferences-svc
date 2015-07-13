@@ -963,6 +963,52 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
         }
     }
 
+    test("should get 400: POST of preferences with invalid json formatted payload to /archive/:id") {
+        val randomId = Random.nextInt()
+        info("Calling POST /archive/" + randomId)
+        post("/archive/" + randomId,
+            """
+              |{
+              |  "enabled" : true,
+              |  "data_format" : [ "JSON", "XML" ],
+              |  "default_archive_container_url" : "https://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+              |  "archive_container_urls": {
+              |      "iad": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives"
+              |  }
+              |};
+            """.stripMargin, Map("Content-Type" -> "application/json")) {
+            status should equal (400)
+            body should include ("must have valid json formatted payload")
+        }
+    }
+
+    test("should get 400: POST of preferences with invalid extra json formatted payload to /archive/:id") {
+        val randomId = Random.nextInt()
+        info("Calling POST /archive/" + randomId)
+        post("/archive/" + randomId,
+            """
+              |{
+              |  "enabled" : true,
+              |  "data_format" : [ "JSON", "XML" ],
+              |  "default_archive_container_url" : "https://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+              |  "archive_container_urls": {
+              |      "iad": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives"
+              |  }
+              |}
+              |{
+              |  "enabled": true,
+              |  "data_format":["JSON", "XML"],
+              |  "default_archive_container_url": "https://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives",
+              |  "archive_container_urls": {
+              |      "iad": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives2"
+              |  }
+              |}
+            """.stripMargin, Map("Content-Type" -> "application/json")) {
+            status should equal (400)
+            body should include ("have more than one json body")
+        }
+    }
+
     test("jsonifyError should return valid json string") {
         // call the method with the errorMessage for testing
         val testErrorMessage = "here's a string with \"special\" characters!\n%#?\\/:[]{}"
