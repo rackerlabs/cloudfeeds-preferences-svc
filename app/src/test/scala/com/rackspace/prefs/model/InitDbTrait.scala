@@ -1,5 +1,6 @@
 package com.rackspace.prefs.model
 
+import com.mchange.v2.c3p0.ComboPooledDataSource
 import com.rackspace.prefs.model.DBTables._
 
 import scala.slick.driver.JdbcDriver.simple._
@@ -8,6 +9,25 @@ import org.joda.time.DateTime
 import scala.io.Source
 
 trait InitDbTrait {
+
+    /**
+    * When you run the tests from command line using gradle(Ex: gradle test), it runs the
+    * tests with reference to the app directory
+    *
+    * When you run the tests from intellij, it is running the test with reference to the main
+    * project directory. This code handles the difference.
+    */
+    private val jdbcUrl = {
+      val userDir: String = System.getProperty("user.dir").replaceFirst("/$", "")
+
+      if (userDir.endsWith("app"))
+        s"jdbc:h2:file:$userDir/build/db/test/preferencesdb;MODE=PostgreSQL;IGNORECASE=TRUE"
+      else
+        s"jdbc:h2:file:$userDir/app/build/db/test/preferencesdb;MODE=PostgreSQL;IGNORECASE=TRUE"
+    }
+
+    val ds: ComboPooledDataSource = new ComboPooledDataSource
+    ds.setJdbcUrl(jdbcUrl)
 
     val ArchivePrefsMetadataSlug = "archive"
 

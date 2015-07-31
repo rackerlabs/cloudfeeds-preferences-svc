@@ -18,7 +18,7 @@ import scala.io.Source
 @RunWith(classOf[JUnitRunner])
 class MetadataTest extends ScalatraSuite with FunSuiteLike with InitDbTrait {
 
-    val db = Database.forDataSource(new ComboPooledDataSource)
+    val db = Database.forDataSource(ds)
     addServlet(new PreferencesService(db), "/*")
 
     val schema = Source.fromInputStream(getClass().getResourceAsStream("/feeds_archives.schema.orderly")).getLines().mkString

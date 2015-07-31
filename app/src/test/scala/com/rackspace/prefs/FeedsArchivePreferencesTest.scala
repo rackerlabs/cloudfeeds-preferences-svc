@@ -20,8 +20,9 @@ import org.json4s.{DefaultFormats, Formats}
 @RunWith(classOf[JUnitRunner])
 class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with InitDbTrait {
 
-    implicit val jsonFormats: Formats = DefaultFormats
-    val db = Database.forDataSource(new ComboPooledDataSource)
+  implicit val jsonFormats: Formats = DefaultFormats
+
+  val db = Database.forDataSource(ds)
     val preferencesService = new PreferencesService(db)
     addServlet(preferencesService, "/*")
 
