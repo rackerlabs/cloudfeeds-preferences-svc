@@ -1009,6 +1009,22 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
         }
     }
 
+    test("should get 400: POST of preferences with invalid json formatted payload") {
+      val randomId = Random.nextInt()
+      info("Calling POST /archive/" + randomId)
+      post("/archive/" + randomId,
+        """
+          |{
+          |   "enabled": true,
+          |   "data_format": ["JSON", "XML"],
+          |   "archive_container_urls": [ "ord": "https://storage.stg.swift.racklabs.com/v1/StagingUS_6171530/ContainerStatesTest"]
+          |}
+        """.stripMargin, Map("Content-Type" -> "application/json")) {
+        status should equal (400)
+        body should include ("must have valid json formatted payload")
+      }
+    }
+
     test("jsonifyError should return valid json string") {
         // call the method with the errorMessage for testing
         val testErrorMessage = "here's a string with \"special\" characters!\n%#?\\/:[]{}"
