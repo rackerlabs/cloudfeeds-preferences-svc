@@ -109,7 +109,7 @@ task uploadVeracode(dependsOn: ':app:jar') {
 
     // get the application ID
     // the application must be pre-created from Veracode web UI
-    def appId =  client.getAppId("Feeds Preferences Service")
+    def appId =  client.getAppId("Feeds Preferences Svc")
     println "For applicationId: " + appId 
     println ""
 
