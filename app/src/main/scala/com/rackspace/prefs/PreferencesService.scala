@@ -78,12 +78,12 @@ with JacksonJsonSupport {
         val payload = request.body
 
         getMetadata(preferenceSlug) match {
-            case Some(metadata: PreferencesMetadata) => {
-                val orderly = Orderly(metadata.schema)
 
-                validateAndWritePreference(metadata, preferenceSlug, id, payload, orderly)
-            }
-            case None => BadRequest(jsonifyError("Preferences for /" + preferenceSlug + " does not have any metadata"))
+            case Some(metadata: PreferencesMetadata) =>
+                validateAndWritePreference(metadata, preferenceSlug, id, payload)
+
+            case None =>
+                BadRequest(jsonifyError("Preferences for /" + preferenceSlug + " does not have any metadata"))
         }
     }
 
@@ -95,11 +95,13 @@ with JacksonJsonSupport {
      * @param payload
      * @return
      */
-    def validateAndWritePreference(metadata: PreferencesMetadata, preferenceSlug: String, id: String, payload: String, orderly: Orderly): ActionResult = {
+    def validateAndWritePreference(metadata: PreferencesMetadata, preferenceSlug: String, id: String, payload: String): ActionResult = {
 
         // check that payload is valid json
         var validateError = validateJson(preferenceSlug, id, payload)
         if (validateError != null) return validateError
+
+        val orderly = Orderly(metadata.schema)
 
         orderly.validate(payload) match {
             case head :: tail =>
