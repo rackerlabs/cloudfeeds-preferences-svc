@@ -16,7 +16,7 @@ import scala.util.parsing.json.JSON
 @RunWith(classOf[JUnitRunner])
 class StatusTest extends ScalatraSuite with FunSuiteLike with InitDbTrait {
 
-    val db = Database.forDataSource(new ComboPooledDataSource)
+    val db = Database.forDataSource(ds)
 
     override def beforeAll {
         super.beforeAll

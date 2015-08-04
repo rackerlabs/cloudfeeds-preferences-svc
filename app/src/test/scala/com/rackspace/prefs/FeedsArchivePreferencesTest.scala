@@ -20,8 +20,9 @@ import org.json4s.{DefaultFormats, Formats}
 @RunWith(classOf[JUnitRunner])
 class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with InitDbTrait {
 
-    implicit val jsonFormats: Formats = DefaultFormats
-    val db = Database.forDataSource(new ComboPooledDataSource)
+  implicit val jsonFormats: Formats = DefaultFormats
+
+  val db = Database.forDataSource(ds)
     val preferencesService = new PreferencesService(db)
     addServlet(preferencesService, "/*")
 
@@ -1007,6 +1008,22 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
             status should equal (400)
             body should include ("have more than one json body")
         }
+    }
+
+    test("should get 400: POST of preferences with invalid json formatted payload") {
+      val randomId = Random.nextInt()
+      info("Calling POST /archive/" + randomId)
+      post("/archive/" + randomId,
+        """
+          |{
+          |   "enabled": true,
+          |   "data_format": ["JSON", "XML"],
+          |   "archive_container_urls": [ "ord": "https://storage.stg.swift.racklabs.com/v1/StagingUS_6171530/ContainerStatesTest"]
+          |}
+        """.stripMargin, Map("Content-Type" -> "application/json")) {
+        status should equal (400)
+        body should include ("must have valid json formatted payload")
+      }
     }
 
     test("jsonifyError should return valid json string") {

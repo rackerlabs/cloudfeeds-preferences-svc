@@ -14,8 +14,7 @@ import scala.slick.jdbc.JdbcBackend.Database
 class DBTablesIT extends FunSuite with BeforeAndAfterAll with InitDbTrait {
 
   val logger = LoggerFactory.getLogger(getClass)
-  val pooledDataSource = new ComboPooledDataSource
-  val db : Database = Database.forDataSource(pooledDataSource)
+  val db : Database = Database.forDataSource(ds)
 
   test ("Verify insertion of data into table preferences") {
     clearData(db)
@@ -64,6 +63,6 @@ class DBTablesIT extends FunSuite with BeforeAndAfterAll with InitDbTrait {
 
   override def afterAll {
     clearData(db)
-    pooledDataSource.close
+    ds.close
   }
 }

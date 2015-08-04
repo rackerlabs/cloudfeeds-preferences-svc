@@ -78,22 +78,12 @@ with JacksonJsonSupport {
         val payload = request.body
 
         getMetadata(preferenceSlug) match {
-            case Some(metadata: PreferencesMetadata) => {
-                val orderly = Orderly(metadata.schema)
 
-                orderly.validate(payload) match {
-                    case head :: tail =>
-                        // give them hints of what's wrong. Only print the first violation.
-                        BadRequest(jsonifyError("Preferences for /" + preferenceSlug + "/" + id +
-                            " does not validate properly. " + head.path + " " + head.message))
+            case Some(metadata: PreferencesMetadata) =>
+                validateAndWritePreference(metadata, preferenceSlug, id, payload)
 
-                    case Nil => {
-                        // valid and non-empty json, write to db
-                        validateAndWritePreference(metadata, preferenceSlug, id, payload)
-                    }
-                }
-            }
-            case None => BadRequest(jsonifyError("Preferences for /" + preferenceSlug + " does not have any metadata"))
+            case None =>
+                BadRequest(jsonifyError("Preferences for /" + preferenceSlug + " does not have any metadata"))
         }
     }
 
@@ -110,6 +100,16 @@ with JacksonJsonSupport {
         // check that payload is valid json
         var validateError = validateJson(preferenceSlug, id, payload)
         if (validateError != null) return validateError
+
+        val orderly = Orderly(metadata.schema)
+
+        orderly.validate(payload) match {
+            case head :: tail =>
+                // give them hints of what's wrong. Only print the first violation.
+                return BadRequest(jsonifyError("Preferences for /" + preferenceSlug + "/" + id +
+                  " does not validate properly. " + head.path + " " + head.message))
+            case Nil => ()
+        }
 
         // parse payload
         val jsonContent = parse(payload)
