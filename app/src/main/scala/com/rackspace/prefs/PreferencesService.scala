@@ -77,7 +77,7 @@ with JacksonJsonSupport {
         val id = params("id")
         val payload = request.body
 
-        getMetadata(preferenceSlug) match {
+        val actionResult: ActionResult = getMetadata(preferenceSlug) match {
 
             case Some(metadata: PreferencesMetadata) =>
                 validateAndWritePreference(metadata, preferenceSlug, id, payload)
@@ -85,6 +85,12 @@ with JacksonJsonSupport {
             case None =>
                 BadRequest(jsonifyError("Preferences for /" + preferenceSlug + " does not have any metadata"))
         }
+
+        if ( !(actionResult.status.code == 200 || actionResult.status.code == 201)) {
+            logger.error(actionResult.toString)
+        }
+
+        actionResult
     }
 
     /**
@@ -138,8 +144,22 @@ with JacksonJsonSupport {
                 " See Cloud Feeds documentation for a list of valid datacenters."))
         }
 
-        // write to db if content pass validation
-        writePreferenceToDb(metadata, id, payload)
+        getAlternateId(request) match {
+            // write to db if content pass validation
+            case Some(alternateIdFromHeader) => {
+
+                //validate alternateId in payload with the the value of alternate id from request header
+                val errorMessages = ( defaultContainer :: archiveContainers)
+                  .flatMap (container => validateAlternateId(preferenceSlug, id, alternateIdFromHeader, container))
+
+                errorMessages match {
+                    case head :: tail => BadRequest(jsonifyError(errorMessages.mkString(";")))
+                    case Nil => writePreferenceToDb(metadata, id, payload, alternateIdFromHeader)
+                }
+            }
+            case None => BadRequest(jsonifyError("Preferences for /" + preferenceSlug + "/" + id +
+              " must have a x-tenant-id header with NastID as value. "))
+        }
     }
 
     /**
@@ -175,6 +195,44 @@ with JacksonJsonSupport {
             }
         }
         result
+    }
+
+    /**
+     * Validates the alternate id present in the container url with the value present in the
+     * request header (x-tenant-id set by repose for that tenant)
+     *
+     * @param preferenceSlug
+     * @param id
+     * @param alternateIdFromHeader
+     * @param container
+     * @return error message
+     */
+    def validateAlternateId(preferenceSlug: String, id: String, alternateIdFromHeader: String, container: JValue): Option[String] = {
+
+        if (container == JNothing) {
+            return None
+        }
+
+        val containerUrl = container.extract[String]
+
+        // this pattern will match url of format http[s]://hostname/rootpath/nastId/container_name, and capture container_name
+        val patternForContainer = "^https?://[^/]+/[^/]+/([^/]+)/.*$".r
+
+        patternForContainer.findFirstMatchIn( container.extract[String] ) match {
+
+            case Some(m) => {
+
+                // first captured group will contain the nastId
+                val alternateIdFromUrl = m.group(1)
+
+                if (alternateIdFromHeader != alternateIdFromUrl) {
+                    Some(s"Preferences for /$preferenceSlug/$id has an nast id: $alternateIdFromUrl in url: $containerUrl which doesn't correspond to the tenant. Tenant nast id : $alternateIdFromHeader")
+                } else
+                    None
+
+            }
+            case None => None
+        }
     }
 
     /**
@@ -329,7 +387,7 @@ with JacksonJsonSupport {
      * @param payload
      * @return
      */
-    def writePreferenceToDb(metadata: PreferencesMetadata, id: String, payload: String): ActionResult = {
+    def writePreferenceToDb(metadata: PreferencesMetadata, id: String, payload: String, alternateId: String): ActionResult = {
         db.withSession { implicit session =>
             val prefsForIdandSlug = preferences.filter(prefs => prefs.id === id && prefs.preferencesMetadataId === metadata.id)
 
@@ -337,15 +395,15 @@ with JacksonJsonSupport {
                 case List(_: Preferences) => {
                     preferences
                       .filter(prefs => prefs.id === id && prefs.preferencesMetadataId === metadata.id)
-                      .map(prefs => (prefs.payload, prefs.updated))
-                      .update(payload, DateTime.now)
+                      .map(prefs => (prefs.payload, prefs.updated, prefs.alternateId))
+                      .update(payload, DateTime.now, Some(alternateId))
 
                     Ok()
                 }
                 case _ => {
                     preferences
                       .map(p => (p.id, p.preferencesMetadataId, p.payload, p.alternateId))
-                      .insert(id, metadata.id.get, payload, getAlternateId(request))
+                      .insert(id, metadata.id.get, payload, Some(alternateId))
 
                     Created()
                 }
