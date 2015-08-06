@@ -168,7 +168,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
     test("should get 201: POST of a new good preferences to /archive/:id") {
         val randomId = Random.nextInt()
         info("Calling POST /archive/" + randomId)
-        post("/archive/" + randomId, prefs_enable_regions, Map("Content-Type" -> "application/json")) {
+        post("/archive/" + randomId, prefs_enable_regions, Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
             if ( status != 201 ) {
                 info(body)
             }
@@ -179,7 +179,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
     test("should get 201: POST of a new good preferences to /archive/:id/ (with trailing slash)") {
         val randomId = Random.nextInt()
         info("Calling POST /archive/" + randomId + "/")
-        post("/archive/" + randomId + "/", prefs_enable_regions, Map("Content-Type" -> "application/json")) {
+        post("/archive/" + randomId + "/", prefs_enable_regions, Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
           if ( status != 201 ) {
             info(body)
           }
@@ -190,7 +190,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
     test("should get 201: POST of a new preferences with only one data_format to /archive/:id") {
         val randomId = Random.nextInt()
         info("Calling POST /archive/" + randomId)
-        post("/archive/" + randomId, prefs_enable_all_json, Map("Content-Type" -> "application/json")) {
+        post("/archive/" + randomId, prefs_enable_all_json, Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
             if ( status != 201 ) {
                 info(body)
                 println(body)
@@ -202,7 +202,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
     test("should get 201: POST of a new preferences with only one data_format to /archive/:id/ (with trailing slash)") {
         val randomId = Random.nextInt()
         info("Calling POST /archive/" + randomId + "/")
-        post("/archive/" + randomId + "/", prefs_enable_all_json, Map("Content-Type" -> "application/json")) {
+        post("/archive/" + randomId + "/", prefs_enable_all_json, Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
             if ( status != 201 ) {
                 info(body)
                 println(body)
@@ -215,7 +215,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
         val randomId = Random.nextInt()
 
         info("Calling 1st POST /archive/" + randomId)
-        post("/archive/" + randomId, prefs_disable_all, Map("Content-Type" -> "application/json")) {
+        post("/archive/" + randomId, prefs_disable_all, Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
             if ( status != 201 ) {
                 info(body)
             }
@@ -223,7 +223,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
         }
 
         info("Calling 2nd POST /archive/" + randomId)
-        post("/archive/" + randomId, prefs_enable_all, Map("Content-Type" -> "application/json")) {
+        post("/archive/" + randomId, prefs_enable_all, Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
             if ( status != 200 ) {
                 info(body)
             }
@@ -235,7 +235,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
         val randomId = Random.nextInt()
 
         info("Calling 1st POST /archive/" + randomId + "/")
-        post("/archive/" + randomId + "/", prefs_disable_all, Map("Content-Type" -> "application/json")) {
+        post("/archive/" + randomId + "/", prefs_disable_all, Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
             if ( status != 201 ) {
                 info(body)
             }
@@ -243,7 +243,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
         }
 
         info("Calling 2nd POST /archive/" + randomId + "/")
-        post("/archive/" + randomId + "/", prefs_enable_all, Map("Content-Type" -> "application/json")) {
+        post("/archive/" + randomId + "/", prefs_enable_all, Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
             if ( status != 200 ) {
                 info(body)
             }
@@ -268,7 +268,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |      "syd": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives"
               |  }
               |}
-            """.stripMargin, Map("Content-Type" -> "application/json")) {
+            """.stripMargin, Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
             status should equal (400)
             body should include ("missing and is not optional")
         }
@@ -293,7 +293,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |      "syd": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives"
               |  }
               |}
-            """.stripMargin, Map("Content-Type" -> "application/json")) {
+            """.stripMargin, Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
             status should equal (400)
             body should include ("is not defined in the schema")
         }
@@ -317,7 +317,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |      "syd": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives"
               |  }
               |}
-            """.stripMargin, Map("Content-Type" -> "application/json")) {
+            """.stripMargin, Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
             status should equal (400)
             body should include ("does not match any enum value")
         }
@@ -341,7 +341,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |      "syd": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives"
               |  }
               |}
-            """.stripMargin, Map("Content-Type" -> "application/json")) {
+            """.stripMargin, Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
             status should equal (400)
             body should include ("does not have any metadata")
         }
@@ -360,7 +360,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |  "default_archive_container_url" : "$invalidUrl%s"
               |}
             """.stripMargin
-            , Map("Content-Type" -> "application/json")) {
+            , Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
             status should equal (400)
             body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl)
         }
@@ -379,7 +379,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |  "default_archive_container_url" : "$invalidUrl%s"
               |}
             """.stripMargin
-            , Map("Content-Type" -> "application/json")) {
+            , Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
             status should equal (400)
             body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl)
         }
@@ -406,7 +406,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |}
             """.stripMargin
 
-        post("/archive/" + randomId, preferenceContent, Map("Content-Type" -> "application/json")) {
+        post("/archive/" + randomId, preferenceContent, Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
             status should equal (400)
             body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl)
         }
@@ -436,7 +436,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
                   |}
                 """.stripMargin
 
-            post("/archive/" + randomId, preferenceContent, Map("Content-Type" -> "application/json")) {
+            post("/archive/" + randomId, preferenceContent, Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
                 status should equal (400)
                 body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl)
             }
@@ -456,7 +456,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |  "default_archive_container_url" : "$invalidUrl%s"
               |}
             """.stripMargin
-            , Map("Content-Type" -> "application/json")) {
+            , Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
             status should equal (400)
             body should include ("Preferences for /archive/" + randomId + " is missing container name: " + invalidUrl)
         }
@@ -482,7 +482,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |  }
               |}
             """.stripMargin
-            , Map("Content-Type" -> "application/json")) {
+            , Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
             status should equal (400)
             body should include ("Preferences for /archive/" + randomId + " is missing container name: " + invalidUrl)
         }
@@ -511,7 +511,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |  "default_archive_container_url" : "$invalidUrl%s"
               |}
             """.stripMargin
-            , Map("Content-Type" -> "application/json")) {
+            , Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
             status should equal (400)
             body should include ("Preferences for /archive/" + randomId + " has an encoded container name longer than 255 bytes: " + invalidUrl)
         }
@@ -547,7 +547,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |  }
               |}
             """.stripMargin
-            , Map("Content-Type" -> "application/json")) {
+            , Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
             status should equal (400)
             body should include ("Preferences for /archive/" + randomId + " has an encoded container name longer than 255 bytes: " + invalidUrl)
         }
@@ -569,7 +569,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
                   |  "default_archive_container_url" : "$invalidUrl%s"
                   |}
                 """.stripMargin
-                , Map("Content-Type" -> "application/json")) {
+                , Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
                 status should equal (400)
                 body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl + ". Url must be encoded and should not contain query parameters or url fragments. Encoded container name cannot contain a forward slash(/) and must be less than 256 bytes in length.")
             }
@@ -595,7 +595,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
                   |  }
                   |}
                 """.stripMargin
-                , Map("Content-Type" -> "application/json")) {
+                , Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
                 status should equal (400)
                 body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl + ". Url must be encoded and should not contain query parameters or url fragments. Encoded container name cannot contain a forward slash(/) and must be less than 256 bytes in length.")
             }
@@ -616,7 +616,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |  "default_archive_container_url" : "$invalidUrl%s"
               |}
             """.stripMargin
-            , Map("Content-Type" -> "application/json")) {
+            , Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
             status should equal (400)
             body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl + ". Url must be encoded and should not contain query parameters or url fragments. Encoded container name cannot contain a forward slash(/) and must be less than 256 bytes in length.")
         }
@@ -636,7 +636,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |  "default_archive_container_url" : "$invalidUrl%s"
               |}
             """.stripMargin
-            , Map("Content-Type" -> "application/json")) {
+            , Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
             status should equal (400)
             body should include ("Preferences for /archive/" + randomId + " has an invalid container name containing '/': " + invalidUrl)
         }
@@ -662,7 +662,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |  }
               |}
               """.stripMargin
-            , Map("Content-Type" -> "application/json")) {
+            , Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
             status should equal (400)
             body should include ("Preferences for /archive/" + randomId + " has an invalid container name containing '/': " + invalidUrl)
         }
@@ -681,7 +681,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |  "default_archive_container_url" : "$invalidUrl%s"
               |}
             """.stripMargin
-            , Map("Content-Type" -> "application/json")) {
+            , Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
             status should equal (400)
             body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl + ". Url must be encoded and should not contain query parameters or url fragments. Encoded container name cannot contain a forward slash(/) and must be less than 256 bytes in length.")
         }
@@ -707,7 +707,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |  }
               |}
             """.stripMargin
-            , Map("Content-Type" -> "application/json")) {
+            , Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
             status should equal (400)
             body should include ("Preferences for /archive/" + randomId + " has an invalid url: " + invalidUrl + ". Url must be encoded and should not contain query parameters or url fragments. Encoded container name cannot contain a forward slash(/) and must be less than 256 bytes in length.")
         }
@@ -716,7 +716,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
     test("should get 201: POST of good preferences with container name having valid url encoding to /archive/:id") {
         val randomId = Random.nextInt()
         info("Calling POST /archive/" + randomId)
-        post("/archive/" + randomId, prefs_enable_all_encoded, Map("Content-Type" -> "application/json")) {
+        post("/archive/" + randomId, prefs_enable_all_encoded, Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
             status should equal (201)
         }
     }
@@ -740,7 +740,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |  }
               |}
             """.stripMargin
-            , Map("Content-Type" -> "application/json")) {
+            , Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
             status should equal (201)
         }
     }
@@ -749,7 +749,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
         val randomId = Random.nextInt()
 
         info("Calling 1st POST /archive/" + randomId)
-        post("/archive/" + randomId, prefs_enable_all_encoded, Map("Content-Type" -> "application/json")) {
+        post("/archive/" + randomId, prefs_enable_all_encoded, Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
             if ( status != 201 ) {
                 info(body)
             }
@@ -757,7 +757,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
         }
 
         info("Calling 2nd POST /archive/" + randomId)
-        post("/archive/" + randomId, prefs_enable_all_encoded, Map("Content-Type" -> "application/json")) {
+        post("/archive/" + randomId, prefs_enable_all_encoded, Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
             if ( status != 200 ) {
                 info(body)
             }
@@ -769,7 +769,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
         val randomId = Random.nextInt()
 
         info("Calling 1st POST /archive/" + randomId + "/")
-        post("/archive/" + randomId + "/", prefs_enable_all, Map("Content-Type" -> "application/json")) {
+        post("/archive/" + randomId + "/", prefs_enable_all, Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
             if ( status != 201 ) {
                 info(body)
             }
@@ -793,7 +793,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |  }
               |}
             """.stripMargin
-            , Map("Content-Type" -> "application/json")) {
+            , Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
             if ( status != 200 ) {
                 info(body)
             }
@@ -815,7 +815,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |  }
               |}
             """.stripMargin
-            , Map("Content-Type" -> "application/json")) {
+            , Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
             if ( status != 201 ) {
                 info(body)
             }
@@ -827,7 +827,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
         val randomId = Random.nextInt()
 
         info("Calling 1st POST /archive/" + randomId + "/")
-        post("/archive/" + randomId + "/", prefs_enable_all, Map("Content-Type" -> "application/json")) {
+        post("/archive/" + randomId + "/", prefs_enable_all, Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
           if ( status != 201 ) {
             info(body)
           }
@@ -847,7 +847,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |  }
               |}
             """.stripMargin
-            , Map("Content-Type" -> "application/json")) {
+            , Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
             if ( status != 200 ) {
                 info(body)
             }
@@ -868,7 +868,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |  }
               |}
             """.stripMargin
-            , Map("Content-Type" -> "application/json")) {
+            , Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
             if ( status != 400 ) {
                 info(body)
             }
@@ -894,7 +894,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |  }
               |}
             """.stripMargin
-            , Map("Content-Type" -> "application/json")) {
+            , Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
             if ( status != 400 ) {
                 info(body)
             }
@@ -921,7 +921,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
             |  }
             |}
           """.stripMargin
-          , Map("Content-Type" -> "application/json")) {
+          , Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
           if ( status != 201 ) {
               info(body)
           }
@@ -933,7 +933,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
         val randomId = Random.nextInt()
 
         info("Calling 1st POST /archive/" + randomId + "/")
-        post("/archive/" + randomId + "/", prefs_enable_all, Map("Content-Type" -> "application/json")) {
+        post("/archive/" + randomId + "/", prefs_enable_all, Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
             if ( status != 201 ) {
                 info(body)
             }
@@ -956,7 +956,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |  }
               |}
             """.stripMargin
-            , Map("Content-Type" -> "application/json")) {
+            , Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
             if ( status != 200 ) {
                 info(body)
             }
@@ -977,7 +977,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |      "iad": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives"
               |  }
               |};
-            """.stripMargin, Map("Content-Type" -> "application/json")) {
+            """.stripMargin, Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
             status should equal (400)
             body should include ("must have valid json formatted payload")
         }
@@ -1004,7 +1004,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
               |      "iad": "http://storage.stg.swift.racklabs.com/v1/Nast-Id_1/FeedsArchives2"
               |  }
               |}
-            """.stripMargin, Map("Content-Type" -> "application/json")) {
+            """.stripMargin, Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
             status should equal (400)
             body should include ("have more than one json body")
         }
@@ -1020,7 +1020,7 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
           |   "data_format": ["JSON", "XML"],
           |   "archive_container_urls": [ "ord": "https://storage.stg.swift.racklabs.com/v1/StagingUS_6171530/ContainerStatesTest"]
           |}
-        """.stripMargin, Map("Content-Type" -> "application/json")) {
+        """.stripMargin, Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
         status should equal (400)
         body should include ("must have valid json formatted payload")
       }
@@ -1039,6 +1039,57 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
         // validate the message
         val returnedErrorString = jsonError.extract[String]
         returnedErrorString should include (testErrorMessage)
+    }
+
+
+    test("should get 400: POST of good preferences with no x-tenant-id header") {
+      val randomId = Random.nextInt()
+
+      info("Calling 1st POST /archive/" + randomId + "/")
+      post("/archive/" + randomId + "/", prefs_enable_all, Map("Content-Type" -> "application/json")) {
+        if (status != 400) {
+          info(body)
+        }
+        status should equal(400)
+      }
+    }
+
+    test("should get 400: POST of good preferences with invalid x-tenant-id header") {
+      val randomId = Random.nextInt()
+
+      info("Calling 1st POST /archive/" + randomId + "/")
+      post("/archive/" + randomId + "/", prefs_enable_all, Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_999")) {
+        if (status != 400) {
+          info(body)
+        }
+        status should equal(400)
+      }
+    }
+
+
+    test("updating preferences should update alternateId column") {
+
+      val randomId = Random.nextInt()
+      info("Calling POST /archive/" + randomId)
+      post("/archive/" + randomId, prefs_enable_regions, Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
+        if ( status != 201 ) {
+          info(body)
+        }
+        status should equal (201)
+      }
+
+      //updating the tenants preference with a new payload that has a changed nast id(Nast-Id_2)
+      info("Calling POST /archive/" + randomId)
+      val newAlternateID: String = "Nast-Id_2"
+      val updatedPreference: String = prefs_enable_regions.replaceAll("Nast-Id_1", newAlternateID)
+      post("/archive/" + randomId, updatedPreference, Map("Content-Type" -> "application/json", "x-tenant-id" -> newAlternateID)) {
+        if ( status != 200 ) {
+          info(body)
+        }
+        status should equal (200)
+      }
+
+      assert(getPreference(db, randomId.toString).get.alternateId.get == newAlternateID, "alternateId column not updated correctly")
     }
 
     override def afterAll() {

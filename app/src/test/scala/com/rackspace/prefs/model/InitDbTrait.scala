@@ -33,6 +33,16 @@ trait InitDbTrait {
 
     val archivingSchema = Source.fromInputStream(getClass.getResourceAsStream("/feeds_archives.schema.orderly")).mkString
 
+    def getPreference(db: Database, id: String): Option[Preferences] = {
+
+        db.withSession { implicit session =>
+          preferences.filter(_.id === id).list match {
+            case List(preferences: Preferences) => Some(preferences)
+            case _ => None
+          }
+        }
+    }
+
     def createPreference(db: Database, id: String, preferenceSlug: String, payload: String) {
         val currentTime = new DateTime()
         db.withSession { implicit session =>
