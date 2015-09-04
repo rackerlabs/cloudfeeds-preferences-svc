@@ -369,8 +369,13 @@ with JacksonJsonSupport {
      */
     def allDataCenterArePresent(preferenceSlug: String, id: String, preferenceJson: JValue): Boolean = {
         // extract "archive_container_urls": { datacenter: url } to Map(String, Any)
-        val containerUrls = (preferenceJson \ "archive_container_urls").extract[Map[String, Any]]
+        val containerUrlsObj = (preferenceJson \ "archive_container_urls")
+        if ( containerUrlsObj == JNothing ) {
+            return false
+        }
+
         // check for all data centers and return boolean
+        val containerUrls = containerUrlsObj.extract[Map[String, Any]]
         containerUrls.contains("iad") &&
         containerUrls.contains("dfw") &&
         containerUrls.contains("ord") &&
