@@ -903,6 +903,25 @@ class FeedsArchivePreferencesTest extends ScalatraSuite with FunSuiteLike with I
         }
     }
 
+    test("should get 400: POST of invalid preferences with NO default and NO data center") {
+        val randomId = Random.nextInt()
+        info("Calling POST /archive/" + randomId + "/")
+        post("/archive/" + randomId + "/",
+            f"""
+              |{
+              |  "enabled" : true,
+              |  "data_format" : [ "XML" ]
+              |}
+            """.stripMargin
+            , Map("Content-Type" -> "application/json", "x-tenant-id" -> "Nast-Id_1")) {
+            if ( status != 400 ) {
+                info(body)
+            }
+            status should equal (400)
+            body should include ("Preferences for /archive/" + randomId + " must have a default_container_url or must have all datacenter archive_container_urls present")
+        }
+    }
+
     test("should get 201: POST of good preferences with NO default and ALL data center") {
       val randomId = Random.nextInt()
       info("Calling POST /archive/" + randomId + "/")
