@@ -1,6 +1,8 @@
 cloudfeeds-preferences-svc
 ==========================
 
+*This project is currently in sustaining mode as deployed within Rackspace.  For more information on how to support this in sustaining mode please see https://one.rackspace.com/display/cloudfeeds/Cloud+Feeds+Sustaining+Mode+Documentation+Start+Page.*
+
 Cloud Feeds Preferences Service is a web service for managing flat JSON based preferences and metadata. 
 Even though this service is initally conceived and now maintained by the Cloud Feeds team, it is 
 a generic service that can be used by any team. The code in this repository does not have anything 
